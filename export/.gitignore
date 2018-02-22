@@ -1,0 +1,5 @@
+/logs/
+export.sqlite3
+.vscode
+logfile
+/logs/*
