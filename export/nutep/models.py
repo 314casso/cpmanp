@@ -61,12 +61,10 @@ class DateQueryEvent(models.Model):
     )
     
     
-    REVISE = 1    
-    TRACKING = 2
-    
+    PREORDER = 1    
+        
     TYPE_CHOICES = (
-        (REVISE, u'Взаиморасчеты'),
-        (TRACKING, u'Слежение'),
+        (PREORDER, u'Предварительные заявки'),        
     )
     
     date = models.DateTimeField(blank=True, auto_now=True, db_index=True, null=True)
@@ -80,71 +78,63 @@ class DateQueryEvent(models.Model):
     objects = PrivateManager()
     
     def __unicode__(self):
-        return u'{0} {1} {2}'.format(self.pk, self.type, self.status)
+        return u'{0}.{1}.{2}'.format(self.pk, self.type, self.status)
 
+
+class PreOrderManager(PrivateManager):
+    def for_user(self, user):
+        if not user:
+            return super(PrivateManager, self).get_queryset().none()
+        return super(PrivateManager, self).get_queryset().filter(event__user=user)
+
+
+class PreOrder(models.Model):
+    event = models.ForeignKey(DateQueryEvent, related_name="orders")
+    objects = PreOrderManager()
+    date = models.DateTimeField(blank=True, db_index=True, null=True)
+    number = models.CharField(blank=True, null=True, max_length=50)
+    clientguid = models.CharField(blank=True, null=True, max_length=36)
+    arrivaldate = models.DateTimeField(blank=True, db_index=True, null=True)
+    feeddate = models.DateTimeField(blank=True, db_index=True, null=True)
+    deliverystopdate = models.DateTimeField(blank=True, db_index=True, null=True)
+    containertrain = models.CharField(blank=True, null=True, max_length=50)
+    deliverypoint = models.CharField(blank=True, null=True, max_length=255)
+    
+    def __unicode__(self):
+        return u'{0}'.format(self.number if self.number else self.pk)
+        
 
 class Container(models.Model):
     number = models.CharField(max_length=12)
     size = models.CharField(blank=True, null=True, max_length=3)
     type = models.CharField(blank=True, null=True, max_length=10)    
     line = models.CharField(blank=True, null=True, max_length=150)
+    transport = models.CharField(blank=True, null=True, max_length=50)
+    releasedate = models.DateTimeField(blank=True, db_index=True, null=True)
+    pre_order = models.ForeignKey(PreOrder, related_name="containers")
+    
     def __unicode__(self):
-        return u'{0}'.format(self.id)
+        return u'{0}'.format(self.number)
 
 
-class Platform(models.Model):
-    number = models.CharField(max_length=50)
-    foot = models.IntegerField(blank=True, null=True)
-    length = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
-    model = models.CharField(max_length=50, blank=True, null=True)
-    mtu = models.CharField(max_length=50, blank=True, null=True)
+class CustomsProcedure(models.Model):
+    container = models.ForeignKey(Container, related_name="procedures")
+    procedure = models.CharField(max_length=50)
+    startdate = models.DateTimeField(blank=True, db_index=True, null=True)
+    enddate = models.DateTimeField(blank=True, db_index=True, null=True)
+    note = models.CharField(max_length=255, blank=True, null=True)
+    
+    def __unicode__(self):
+        return u'{0}'.format(self.procedure)
 
 
-class RailData(models.Model):
-    train = models.CharField(max_length=50, blank=True, null=True)
-    invoice = models.CharField(max_length=50, blank=True, null=True)
-    departurestation = models.CharField(max_length=50, blank=True, null=True)
-    departuredate = models.DateField(blank=True, null=True)
-    destinationstation = models.CharField(max_length=50, blank=True, null=True)
-    totaldistance = models.IntegerField(blank=True, null=True)
-    estimatedtime = models.IntegerField(blank=True, null=True)
-
-
-class RailTracking(models.Model):    
-    operationstation = models.CharField(max_length=50, blank=True, null=True)
-    daysinroute = models.IntegerField(blank=True, null=True)
-    remainingdistance = models.IntegerField(blank=True, null=True)
-    arrivaldate = models.DateField(blank=True, null=True)
-
-
-class FreightData(models.Model):
-    bl = models.CharField(max_length=50, blank=True, null=True)
-    deal = models.CharField(max_length=50, blank=True, null=True)
-    vessel = models.CharField(max_length=50, blank=True, null=True)
-    voyage = models.CharField(max_length=50, blank=True, null=True)
-    dateoutplan = models.DateField(blank=True, null=True)
-    pod = models.CharField(max_length=50, blank=True, null=True)
-    podcountry = models.CharField(max_length=50, blank=True, null=True)
-
-
-class FreightTracking(models.Model):
-    departuredate = models.DateField(blank=True, null=True)
-    arrivaldate = models.DateField(blank=True, null=True)
-    pot = models.CharField(max_length=50, blank=True, null=True)
-    arrivaldatepot = models.DateField(blank=True, null=True)
-    departuredatepot = models.DateField(blank=True, null=True)
-    daysinroute = models.IntegerField(blank=True, null=True)
-    arrivaldateactual = models.DateField(blank=True, null=True)
-
-
-class RailFreightTracking(models.Model):
-    event = models.ForeignKey(DateQueryEvent, related_name="tracks")
-    container = models.ForeignKey(Container, blank=True, null=True)
-    platform = models.ForeignKey(Platform, blank=True, null=True)
-    raildata = models.ForeignKey(RailData, blank=True, null=True)
-    railtracking = models.ForeignKey(RailTracking, blank=True, null=True)
-    freightdata = models.ForeignKey(FreightData, blank=True, null=True)
-    freighttracking = models.ForeignKey(FreightTracking, blank=True, null=True)
+class ProcedureLog(models.Model):
+    procedure = models.ForeignKey(CustomsProcedure, related_name="logs")
+    date = models.DateTimeField(blank=True, db_index=True, null=True)
+    note = models.CharField(max_length=255, blank=True, null=True)
+    
+    def __unicode__(self):
+        return u'{0}'.format(self.date)
 
 
 class File(models.Model):   
@@ -336,20 +326,7 @@ class InfoSource(models.Model):
     
     def __unicode__(self):
         return u'{0}'.format(self.name)
-    
 
-class News(ProcessDeletedModel):    
-    date = models.DateTimeField(db_index=True)
-    title = models.CharField(_('title'), max_length=150)
-    summary = models.CharField(_('summary'), max_length=250)
-    url = models.CharField(_('url'), max_length=250)
-    info_source = models.ForeignKey(InfoSource)
-    
-    class Meta:
-        ordering = ('-date', )
-    
-    def __unicode__(self):
-        return u'{0}'.format(self.title)
 
 
         

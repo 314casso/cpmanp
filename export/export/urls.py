@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from nutep.views import (RailFreightTrackingAPIView, ReviseAPIView)
 from django.conf.urls.static import static
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
@@ -23,9 +22,7 @@ urlpatterns = [
 
 urlpatterns += [ 
 #     url(r'^$', landing, name='landing'), 
-#     url(r'^services/$', ServiceView.as_view(), name='services'),
-    url(r'^pingtracking/$', RailFreightTrackingAPIView.as_view(), name='pingtracking'),
-    url(r'^pingrevise/$', ReviseAPIView.as_view(), name='pingrevise'),   
+#     url(r'^services/$', ServiceView.as_view(), name='services'),       
 ]
 
 urlpatterns += [
@@ -47,12 +44,10 @@ from nutep import views
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'events', views.EventViewSet, 'events')
-router.register(r'trackevents', views.TrackingViewSet, 'trackevents')
-router.register(r'reviseevents', views.ReviseViewSet, 'reviseevents')
 router.register(r'employees', views.EmployeesViewSet, 'employees')
-router.register(r'dealstats', views.DealStats, 'dealstats')
 router.register(r'jobstatus', views.JobStatus, 'jobstatus')
-router.register(r'news', views.NewsViewSet, 'news')
+router.register(r'pingorderlist', views.PingOrderList, 'pingorderlist')
+router.register(r'orderlist', views.OrderListViewSet, 'orderlist')
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

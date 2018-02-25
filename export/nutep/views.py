@@ -22,13 +22,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from nutep.forms import ReviseForm, TrackingForm
-from nutep.models import News, DateQueryEvent
-from nutep.serializers import UserSerializer, DateQueryTrackingSerializer, \
-    EventStatusSerializer, DateQueryReviseSerializer, EmployeesSerializer,\
-    NewsSerializer
-from nutep.tasks import tracking_task, revise_task
+from nutep.models import DateQueryEvent, PreOrder
+from nutep.serializers import UserSerializer, EventStatusSerializer, EmployeesSerializer,\
+    PreOrderSerializer
+
 from django.utils.timezone import now
 from datetime import timedelta
+from nutep.tasks import pre_order_task
 
 
 logger = logging.getLogger('django.request')
@@ -52,10 +52,7 @@ class BaseView(TemplateView):
     def dispatch(self, *args, **kwargs):
         return super(BaseView, self).dispatch(*args, **kwargs)
     
-    def news(self):        
-        limit = 5
-        return News.objects.all()[:limit]
-    
+        
     def get_dealstats(self, dateformat="%d.%m.%Y %H:%M:%S"):
         company = self.request.user.companies.filter(membership__is_general=True).first()
         if not company:
@@ -89,7 +86,6 @@ class BaseView(TemplateView):
             'title': force_unicode('Рускон Онлайн'), 
             'manager': manager,
             'head': head,
-            'news': self.news(),
             'dealstats': dealstats,
             'revise_form': revise_form,
             'tracking_form': tracking_form,
@@ -122,34 +118,15 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
 
-
-class TrackingViewSet(viewsets.ModelViewSet):     
-    serializer_class = DateQueryTrackingSerializer
-    def get_queryset(self):
-        return DateQueryEvent.objects.for_user(self.request.user).filter(type=DateQueryEvent.TRACKING).order_by('-date')[:1]
  
- 
-class ReviseViewSet(viewsets.ModelViewSet):
-    serializer_class = DateQueryReviseSerializer
-    def get_queryset(self):
-        return DateQueryEvent.objects.for_user(self.request.user).filter(type=DateQueryEvent.REVISE).order_by('-date')[:1]
- 
- 
-class RailFreightTrackingAPIView(APIView):
-    def post(self, request):
-        job = tracking_task.delay(request.user)  # @UndefinedVariable        
-        return Response({ 'job': job.id })
-    
-    
-class ReviseAPIView(APIView):
-    def post(self, request):
+class PingOrderList(viewsets.ViewSet):
+    def list(self, request):
         today = now()
-        start_date = today - timedelta(days=360) 
-        end_date = today
-        job = revise_task.delay(request.user, start_date, end_date)  # @UndefinedVariable        
-        return Response({ 'job': job.id })    
-
-
+        start_date = today - timedelta(days=360)
+        job = pre_order_task.delay(request.user, start_date)  # @UndefinedVariable        
+        return Response({ 'job': job.id })  
+ 
+  
 class JobStatus(viewsets.ViewSet):
     def retrieve(self, request, pk):        
         print request.POST       
@@ -157,17 +134,6 @@ class JobStatus(viewsets.ViewSet):
         job = queue.fetch_job(pk)
         status = job.status if job else None
         return Response({ 'job': status })
-    
-
-class DealStats(viewsets.ViewSet):
-    def list(self, request):       
-        company = request.user.companies.filter(membership__is_general=True).first()
-        if not company:
-            return Response({})
-        deal_stats = company.details.get('DealStats')
-        if deal_stats:
-            return Response({ 'deal_stats': deal_stats })
-        return Response({})    
     
 
 class EventViewSet(viewsets.ModelViewSet):    
@@ -180,12 +146,10 @@ class EmployeesViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeesSerializer
     def get_queryset(self):
         return self.request.user.managers.all()    
-
-
-class NewsViewSet(viewsets.ModelViewSet):
-    limit = 5
-    serializer_class = NewsSerializer
+          
+                      
+class OrderListViewSet(viewsets.ModelViewSet):
+    serializer_class = PreOrderSerializer                         
     def get_queryset(self):        
-        return News.objects.all()[:self.limit]                          
-                          
+        return PreOrder.objects.for_user(self.request.user).order_by('date')
                           

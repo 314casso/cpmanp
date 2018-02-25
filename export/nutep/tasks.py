@@ -1,5 +1,5 @@
 from django_rq import job
-from nutep.services import DealService, TrackingService, ReviseService
+from nutep.services import DealService, OrderService
 from export.local_settings import WEB_SERVISES
 import json
 
@@ -16,13 +16,9 @@ def update_user(user):
     
 
 @job('default')
-def tracking_task(user):            
-    service = TrackingService(WEB_SERVISES['report'])                        
-    service.get_track(user)
+def pre_order_task(user, start_date):            
+    service = OrderService(WEB_SERVISES['cp'])                        
+    service.order_list(user, start_date)
     
-
-@job('default')
-def revise_task(user, start_date, end_date):            
-    service = ReviseService(WEB_SERVISES['erp'])
-    print service.get_revise(user, start_date, end_date)                        
+                        
                 

@@ -5,8 +5,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
 from nutep.models import (BaseError, UserProfile, Team, CompanyManager,
-    Employee, News, InfoSource, File, Company, Membership, DateQueryEvent,
-    Container, RailFreightTracking)
+    Employee, InfoSource, File, Company, Membership, DateQueryEvent,
+    Container, PreOrder, CustomsProcedure)
 from nutep.services import DealService
 from export.local_settings import WEB_SERVISES
 import json
@@ -95,11 +95,11 @@ admin.site.register(User, UserProfileAdmin)
 admin.site.register(BaseError)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Employee, EmployeeAdmin)
-admin.site.register(News, NewsAdmin)
 admin.site.register(InfoSource, InfoSourceAdmin)
 admin.site.register(File, FileAdmin)
 admin.site.register(Company, CompanyAdmin)
 admin.site.register(DateQueryEvent, DateQueryEventAdmin)
 admin.site.register(Container, ContainerAdmin)
-admin.site.register(RailFreightTracking)
+admin.site.register(PreOrder)
+admin.site.register(CustomsProcedure)
 

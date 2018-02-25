@@ -1,8 +1,7 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from rest_framework import serializers
-from nutep.models import DateQueryEvent, File, UserProfile, RailFreightTracking,\
-    Container, Platform, RailData, RailTracking, FreightData, FreightTracking,\
-    Employee, News
+from nutep.models import DateQueryEvent, File, UserProfile,\
+    Container,Employee, PreOrder, CustomsProcedure, ProcedureLog
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -25,81 +24,24 @@ class FileSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('title', 'file')
 
 
+class ProcedureLogProcedureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProcedureLog
+        fields = '__all__'
+
+
+class CustomsProcedureSerializer(serializers.ModelSerializer):
+    logs = ProcedureLogProcedureSerializer(many=True)
+    class Meta:
+        model = CustomsProcedure
+        fields = '__all__'
+
+
 class ContainerSerializer(serializers.ModelSerializer):
+    procedures = CustomsProcedureSerializer(many=True)
     class Meta:
         model = Container
         fields = '__all__'
-        
-
-class PlatformSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Platform
-        fields = '__all__'        
-        
-
-class RailDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RailData
-        fields = '__all__'        
-        
-        
-class RailTrackingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RailTracking
-        fields = '__all__'        
-        
-
-class FreightDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FreightData
-        fields = '__all__'          
-        
-        
-class FreightTrackingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FreightTracking
-        fields = '__all__'        
-        
-
-class TrackSerializer(serializers.HyperlinkedModelSerializer):
-    container = ContainerSerializer()
-    platform = PlatformSerializer()
-    raildata = RailDataSerializer()
-    railtracking = RailTrackingSerializer()
-    freightdata = FreightDataSerializer()
-    freighttracking = FreightTrackingSerializer()
-    class Meta:
-        model = RailFreightTracking
-        fields = ('container', 'platform', 'raildata', 'railtracking', 'freightdata', 'freighttracking')
-               
-
-class DateQueryTrackingSerializer(serializers.HyperlinkedModelSerializer):        
-    files = FileSerializer(many=True)
-    user = UserSerializer()  
-    tracks = TrackSerializer(many=True)
-    type = serializers.SerializerMethodField()
-    
-    def get_type(self, obj):
-        return obj.get_type_display()  
-      
-    class Meta:
-        depth = 1
-        model = DateQueryEvent
-        fields = ('id', 'date', 'user', 'type', 'files', 'status', 'note', 'tracks')
-
-
-class DateQueryReviseSerializer(serializers.HyperlinkedModelSerializer):        
-    files = FileSerializer(many=True)
-    user = UserSerializer() 
-    type = serializers.SerializerMethodField()
-    
-    def get_type(self, obj):
-        return obj.get_type_display()  
-      
-    class Meta:
-        depth = 1
-        model = DateQueryEvent
-        fields = ('id', 'date', 'user', 'type', 'files', 'status', 'note')
 
 
 class EventStatusSerializer(serializers.HyperlinkedModelSerializer):       
@@ -108,7 +50,15 @@ class EventStatusSerializer(serializers.HyperlinkedModelSerializer):
         depth = 1
         model = DateQueryEvent
         fields = ('id', 'date', 'type', 'status', 'user')
-     
+
+
+class PreOrderSerializer(serializers.ModelSerializer):
+    #event = EventStatusSerializer()
+    containers = ContainerSerializer(many=True)    
+    class Meta:
+        model = PreOrder        
+        fields = '__all__'
+
 
 class EmployeesSerializer(serializers.ModelSerializer):
     users = UserSerializer(many=True)
@@ -116,11 +66,7 @@ class EmployeesSerializer(serializers.ModelSerializer):
         depth = 1
         model = Employee
         fields = ('domainname','crm_id','portal_id','first_name','last_name','middle_name','job_title','image','head','mobile','phone','email','skype','users')
-                
+             
 
-class NewsSerializer(serializers.ModelSerializer):    
-    class Meta:
-        depth = 1
-        model = News
-        fields = '__all__'
+
         
