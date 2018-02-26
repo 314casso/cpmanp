@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 from django.conf.urls.static import static
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from nutep.views import landing, ServiceView
 
 admin.autodiscover()
 
@@ -15,14 +17,14 @@ urlpatterns = [
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
-#     url(r'^accounts/login/$', auth_views.login, name='login'),
-#     url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),
+    url(r'^accounts/login/$', auth_views.login, name='login'),
+    url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),
     url(r'^admin/', include(admin.site.urls)),
 ]
 
 urlpatterns += [ 
-#     url(r'^$', landing, name='landing'), 
-#     url(r'^services/$', ServiceView.as_view(), name='services'),       
+    url(r'^$', landing, name='landing'), 
+    url(r'^services/$', ServiceView.as_view(), name='services'),       
 ]
 
 urlpatterns += [

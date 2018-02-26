@@ -1,0 +1,22 @@
+<dt><i class="fa fa-file-excel-o" aria-hidden="true"></i> Loading List</dt>
+<dd>
+ <a data-url="{% url 'get-loading-list' template.pk %}" id="loadinglist" title="Получть погрузочный лист в формате Microsoft Excel" class="btn-link" href="#">Сформировать</a>
+</dd>					
+<dt><i class="fa fa-paperclip" aria-hidden="true"></i> Сканы поручений</dt>
+<dd>
+	<ul class="list-inline"> 
+	{% for mission in missions %}                                     
+	   {% for file in mission.pdf_files %}
+	   <li class="list-inline-item">
+	       <a title="{{ file.title }}" class="btn-link" href="{{ file.file.url }}">
+	       {% if file.note %}
+	       		{{ file.note }}
+	       {% else %}
+	       		{{ file.title }}
+	       {% endif %}                           
+	       </a>
+	    </li>						
+	    {% endfor %}   
+	{% endfor %}
+	</ul>    
+</dd>

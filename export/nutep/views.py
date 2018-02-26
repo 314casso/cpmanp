@@ -76,17 +76,17 @@ class BaseView(TemplateView):
             if head:
                 head.title = u"Руководитель менеджера"
         
-        dealstats = self.get_dealstats()
+#         dealstats = self.get_dealstats()
         
         start_date = datetime.date.today().replace(day=1)
         revise_form = ReviseForm(user=self.request.user, initial={'start_date': start_date.strftime('%d.%m.%Y')})
         tracking_form = TrackingForm(user=self.request.user)
                 
         context.update({
-            'title': force_unicode('Рускон Онлайн'), 
+            'title': force_unicode('МАНП Онлайн'), 
             'manager': manager,
             'head': head,
-            'dealstats': dealstats,
+#             'dealstats': dealstats,
             'revise_form': revise_form,
             'tracking_form': tracking_form,
         })         
@@ -151,5 +151,5 @@ class EmployeesViewSet(viewsets.ModelViewSet):
 class OrderListViewSet(viewsets.ModelViewSet):
     serializer_class = PreOrderSerializer                         
     def get_queryset(self):        
-        return PreOrder.objects.for_user(self.request.user).order_by('date')
+        return PreOrder.objects.for_user(self.request.user).filter(containertrain__isnull=False).order_by('date')
                           

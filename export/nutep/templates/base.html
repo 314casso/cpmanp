@@ -1,0 +1,330 @@
+{% load staticfiles %}
+{% load thumbnail %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ title }}</title>
+
+    <!-- Bootstrap -->
+    <link href="{{ STATIC_URL }}vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ STATIC_URL }}vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="{{ STATIC_URL }}/vendors/nprogress/nprogress.css" rel="stylesheet">
+    <!-- iCheck -->
+    <link href="{{ STATIC_URL }}/vendors/iCheck/skins/flat/green.css" rel="stylesheet">
+    <!-- bootstrap-progressbar -->
+    <link href="{{ STATIC_URL }}/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css" rel="stylesheet">
+	<!-- Fileinput -->
+	<link href="{{ STATIC_URL }}/vendors/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet">
+	<!-- Datatables -->    
+    <link href="{{ STATIC_URL }}/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
+    
+    <!-- PNotify -->
+    <link href="{{ STATIC_URL }}/vendors/pnotify/dist/pnotify.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}/vendors/pnotify/dist/pnotify.buttons.css" rel="stylesheet">    
+    
+    
+    
+	{{ revise_form.media.css }}
+
+    <!-- Custom Theme Style -->
+    <link href="{{ STATIC_URL }}build/css/custom.css?0.006" rel="stylesheet">
+  </head>
+
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="{% url 'services' %}" class="site_title"><i class="fa fa-tachometer"></i> <span>              
+              Личный кабинет                            
+              </span>              
+              </a>                            
+            </div>
+
+            <div class="clearfix"></div>
+
+            <!-- menu profile quick info -->
+            <div class="profile clearfix">
+              <div class="profile_pic">               
+                <img src="{% thumbnail request.user.profile.image 100x100 crop %}" alt="..." class="img-circle profile_img">                
+              </div>
+              <div class="profile_info">
+              	{% if request.user.is_authenticated %} <span>Здравствуйте,</span> 
+			  	{% else %}<a href="{% url 'login' %}">Войти</a>{% endif %}
+                <h2>{{ request.user.profile.fullname }}</h2>                
+              </div>
+            </div>
+            <!-- /menu profile quick info -->
+
+            
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">                
+                <ul class="nav side-menu">
+                  <li><a><i class="fa fa-home"></i> Сервисы <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{% url 'services' %}"> Панель управления</a></li>                      
+                      
+                    </ul>
+                  </li>                  
+                       
+                  <li><a><i class="fa fa-info-circle"></i>Информация <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="#">Прочее</a></li>                                            
+                    </ul>
+                  </li>     
+                                   
+                  
+                  <li><a><i class="fa fa-question-circle"></i>Поддержка <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="#">Документация</a></li>
+                      <li><a href="mailto:it-support2@ruscon.global">Запрос в поддержку</a></li>                      
+                    </ul>
+                  </li>
+                </ul>
+              </div>             
+            </div>
+            <!-- /sidebar menu -->
+
+            <!-- /menu footer buttons -->
+            <div class="sidebar-footer hidden-small">              
+              <a data-toggle="tooltip" data-placement="top" title="Выйти" href="{% url 'logout' %}">
+                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+              </a>
+            </div>
+            <!-- /menu footer buttons -->
+          </div>
+        </div>
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav>
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+
+              <ul class="nav navbar-nav navbar-right">
+                <li class="">
+                  <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                  	<img src="{% thumbnail request.user.profile.image 100x100 crop %}" alt="...">                  	
+                    {{ request.user.profile.fullname }}
+                    <span class=" fa fa-angle-down"></span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-usermenu pull-right">                    
+                    <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out pull-right"></i> Выйти</a></li>           
+                  </ul>                  
+                </li>                               
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- /top navigation -->
+
+        <!-- page content -->
+        {% block content %}
+        <div class="right_col" role="main">
+
+          <div class="clearfix"></div>
+          
+                           
+          
+        <div class="clearfix"></div>  
+		
+		<div class="row">
+				              
+			
+		</div>
+		
+		<div class="clearfix"></div>
+		
+		<div id="app-settings">            				
+
+            <div id="error-message" class="alert alert-danger">
+                <strong>Ошибка!</strong> <% error %>
+            </div>
+        
+        </div>
+		
+		<!-- Button trigger modal -->
+
+			<div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h3><i class="fa fa-train"></i> Контейнерные поезда</h3>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>                      
+                      <li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div id="app-revise" v-cloak class="x_content table-responsive">
+
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>                    
+                        <th>Номер поезда</th>                            
+                        <th>Прибытие на станцию</th>
+                        <th>Подача на МАНП</th>
+                        <th>Закрытие доставки</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="datarow" v-for="item in items" v-on:click="setCurrentItem(item)">
+                      	<th scope="row"><% item.containertrain %></th>
+                        <td><% item.arrivaldate | moment %></td>
+						<td><% item.feeddate | moment %></td>
+						<td><% item.deliverystopdate | moment %></td>                                           
+                      </tr>                    
+                    </tbody>
+                  </table>
+				  
+				  <div v-if="currentItem">	
+					  <h3>Таможенные процедуры для <strong><% currentItem.containertrain %></strong></h3>
+	                  
+	                  <div class="input-group">
+					    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+					    <input v-model='search' type="text" class="form-control" name="search" placeholder="Поиск контейнера...">
+					  </div>
+	                  
+	                  <table class="table table-hover">
+	                    <thead>
+	                      <tr>                                                
+	                        <th>Контейнер</th>
+	                        <th>Размер и тип</th>
+	                        <th>Выпуск / ВТТ</th>
+	                        <th>Таможенные процедуры</th>
+	                        
+	                      </tr>
+	                    </thead>
+	                    <tbody>
+	                      <tr class="datarow" v-for="container in currentContainers()">
+	                        <th scope="row"><% container.number %></th>
+	                        <td><% container.size %><% container.type %></td>
+							<td><% container.releasedate | moment %></td>  
+							<td>
+								<ul v-if="container.procedures" class="list-group" style="margin-bottom: 0">
+									<li class="list-group-item" v-for="procedure in container.procedures">
+										<i class="glyphicon glyphicon-pushpin"></i>
+										<strong><% procedure.procedure %></strong>
+										
+										
+										<span title="Дата начала и дата окончания" v-if='procedure.startdate' class="label label-info">																					
+										<% procedure.startdate | moment %> 
+										<span v-if='procedure.enddate'> - <% procedure.enddate | moment %></span> 
+										</span>
+										
+										<br>			
+										<span class="text-muted">										
+											<% procedure.note %>
+										</span>
+										
+										<small title="События по процедуре">
+										<ul v-if="procedure.logs">
+											<li v-for="log in procedure.logs">
+												<% log.date | moment %>												
+												<span class="text-primary">										
+													<% log.note %>
+												</span>												
+											</li>
+										</ul>
+										</small>
+									</li>
+								</ul>
+							</td>                                          
+	                      </tr>                    
+	                    </tbody>
+	                  </table>
+                  </div>
+                                    
+                  </div>
+                </div>
+              </div>
+           </div>
+
+              
+        </div>        
+        {% endblock content %}
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <footer>
+          <div class="pull-right">
+            ©1997-{% now "Y" %} «МАНП» веб-портал по работе с клиентами 
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="{{ STATIC_URL }}vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="{{ STATIC_URL }}vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.3/vue.min.js"></script>
+        
+    <!-- FastClick -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js"></script>
+    <!-- NProgress -->
+    <script src="{{ STATIC_URL }}vendors/nprogress/nprogress.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    
+    <!-- bootstrap-progressbar -->
+    <script src="{{ STATIC_URL }}vendors/bootstrap-progressbar/bootstrap-progressbar.min.js"></script>
+    <!-- iCheck -->
+    <script src="{{ STATIC_URL }}vendors/iCheck/icheck.min.js"></script>
+    
+    <!-- Flot -->
+    <script src="{{ STATIC_URL }}vendors/Flot/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}vendors/Flot/jquery.flot.pie.js"></script>
+    <script src="{{ STATIC_URL }}vendors/Flot/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}vendors/Flot/jquery.flot.stack.js"></script>
+    <script src="{{ STATIC_URL }}vendors/Flot/jquery.flot.resize.js"></script>
+    <!-- Flot plugins -->
+    <script src="{{ STATIC_URL }}vendors/flot.orderbars/js/jquery.flot.orderBars.js"></script>
+    <script src="{{ STATIC_URL }}vendors/flot-spline/js/jquery.flot.spline.min.js"></script>
+    <script src="{{ STATIC_URL }}vendors/flot.curvedlines/curvedLines.js"></script>
+    
+    <script src="{{ STATIC_URL }}vendors/moment/min/moment.min.js"></script>
+    <script src="{{ STATIC_URL }}vendors/moment/locale/ru.js"></script>
+    
+    <script src="{{ STATIC_URL }}vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
+    
+    <script src="{{ STATIC_URL }}vendors/DateJS/build/date.js"></script>
+    
+    <!-- Fileinput -->
+    <script src="{{ STATIC_URL }}vendors/bootstrap-fileinput/js/fileinput.min.js"></script>
+    <script src="{{ STATIC_URL }}vendors/bootstrap-fileinput/js/locales/ru.js"></script>
+    
+    <script src="{{ STATIC_URL }}/vendors/bootbox/bootbox.min.js"></script>
+    
+    <!-- PNotify -->
+    <script src="{{ STATIC_URL }}vendors/pnotify/dist/pnotify.js"></script>
+    <script src="{{ STATIC_URL }}vendors/pnotify/dist/pnotify.buttons.js"></script>    
+    
+    {{ revise_form.media.js }}
+        
+    <!-- Custom Theme Scripts -->
+    <script src="{{ STATIC_URL }}build/js/custom.js?0.012"></script>
+    
+    <!-- Datatables -->      
+       
+	
+  </body>
+</html>

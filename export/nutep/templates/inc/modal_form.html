@@ -1,0 +1,23 @@
+<!-- Modal -->
+<div class="modal fade" id="{{ form.form_id }}" role="dialog" aria-labelledby="{{ form.form_id }}Label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <form data-action="{% url form.action %}" id="{{ form.form_id }}Form">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="{{ form.form_id }}Label">{{ form.title }}</h4>
+      </div>
+      <div class="modal-body">
+      
+      {% csrf_token %}
+      {{ form.as_p }}
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ form.cancel_title }}</button>
+        <button id="{{ form.form_id }}Submit" type="submit" class="btn btn-primary">{{ form.ok_title }}</button>
+      </div>
+    </form>    
+    </div>
+  </div>
+</div>
