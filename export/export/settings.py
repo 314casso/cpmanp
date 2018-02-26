@@ -24,7 +24,7 @@ AUTH_PROFILE_MODULE = "nutep.UserProfile"
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'cp.ruscon.global', '192.168.18.128']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'cp.mosagr.ru']
 
 from local_settings import * #@UnusedWildImport
 
