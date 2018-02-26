@@ -5409,14 +5409,32 @@ $(function() {
 				  return moment(date).format('DD.MM.YYYY HH:mm');
 			  }
 		  }
-		},			
+		},	
+		mounted () {
+			this.pingOrders();
+			this.fetchData();
+		},
 		methods: {
 			setItemLoading: function (item) {
 				item.status = "";				
 				item.status_class = "";				
 				item.load_image = "<div class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>";
-			},
+			},		
+			pingOrders: function () {				
+				var xhr = new XMLHttpRequest()
+				var self = this;
+				xhr.open('GET', '/api/pingorderlist/');
+				xhr.onload = function () {					
+					resp = JSON.parse(xhr.responseText);
+					if (resp.job != 'cached') {
+						console.log(resp);
+						setTimeout(self.fetchData, 10000);
+					} 
+				}
+				xhr.send();
+			}, 
 			fetchData: function () {
+				console.log('fetchData');
 				var xhr = new XMLHttpRequest()
 				var self = this;
 				xhr.open('GET', '/api/orderlist/');
@@ -5424,8 +5442,7 @@ $(function() {
 					self.items = JSON.parse(xhr.responseText, reviver);
 					if (self.items) {
 						self.currentItem = self.items[0];
-					}
-					console.log(self.items[0].number)
+					}					
 					var do_refresh = false;
 					self.items.forEach(function (item, i, arr) {		
 						if (item.refreshing) {
@@ -5444,7 +5461,7 @@ $(function() {
 				window.location.href = url;
 			},
 			setCurrentItem: function (item) {
-				this.currentItem = item; 
+				this.currentItem = item;				
 			},
 			currentContainers: function () {
 				if (this.currentItem) {
@@ -5488,10 +5505,7 @@ $(function() {
 				
 			},
 		},
-	});
-	
-	appRevise.fetchData();
-	
+	});			
 });
 
 

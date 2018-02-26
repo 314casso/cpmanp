@@ -29,6 +29,7 @@ from nutep.serializers import UserSerializer, EventStatusSerializer, EmployeesSe
 from django.utils.timezone import now
 from datetime import timedelta
 from nutep.tasks import pre_order_task
+from django.core.cache import cache
 
 
 logger = logging.getLogger('django.request')
@@ -122,6 +123,10 @@ class UserViewSet(viewsets.ModelViewSet):
 class PingOrderList(viewsets.ViewSet):
     def list(self, request):
         today = now()
+        key = 'last_ping_order_list'
+        if cache.get(key):
+            return Response({ 'job': 'cached' })
+        cache.set(key, today, 30)   
         start_date = today - timedelta(days=360)
         job = pre_order_task.delay(request.user, start_date)  # @UndefinedVariable        
         return Response({ 'job': job.id })  

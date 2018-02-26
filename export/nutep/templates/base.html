@@ -182,7 +182,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr class="datarow" v-for="item in items" v-on:click="setCurrentItem(item)">
+                      <tr class="datarow" v-for="item in items" v-on:click="setCurrentItem(item)" v-bind:class="{active: item == currentItem }">
                       	<th scope="row"><% item.containertrain %></th>
                         <td><% item.arrivaldate | moment %></td>
 						<td><% item.feeddate | moment %></td>
@@ -274,6 +274,8 @@
     <script src="{{ STATIC_URL }}vendors/jquery/dist/jquery.min.js"></script>
     <!-- Bootstrap -->
     <script src="{{ STATIC_URL }}vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    
+    <script src="{{ STATIC_URL }}js/lodash/lodash.min.js"></script>
     
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.3/vue.min.js"></script>
         
