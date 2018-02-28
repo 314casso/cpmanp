@@ -5424,8 +5424,13 @@ $(function() {
 					return;
 				}
 				xhr.open('GET', '/api/jobstatus/' + job + '/');
-				xhr.onload = function () {							
-					resp = JSON.parse(xhr.responseText);
+				xhr.onload = function () {	
+					try {
+						resp = JSON.parse(xhr.responseText);
+				    } catch (e) {
+				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
+				    }
+					
 					console.log(resp.job);
 					if (resp.job == 'started') {						
 						setTimeout(self.checkJob, 1000, job);

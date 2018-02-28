@@ -181,7 +181,7 @@ INSTALLED_APPS = (
 )
 
 RQ_QUEUES = {
-    'default': {
+    'mosagr': {
         'HOST': 'localhost',
         'PORT': 6379,
         'DB': 0,        

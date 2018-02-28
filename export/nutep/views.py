@@ -134,7 +134,7 @@ class PingOrderList(viewsets.ViewSet):
   
 class JobStatus(viewsets.ViewSet):
     def retrieve(self, request, pk):       
-        queue = django_rq.get_queue('default')
+        queue = django_rq.get_queue('mosagr')
         job = queue.fetch_job(pk)
         status = job.status if job else None
         return Response({ 'job': status })
