@@ -5465,10 +5465,14 @@ $(function() {
 				var self = this;
 				xhr.open('GET', '/api/orderlist/');
 				xhr.onload = function () {					
-					self.items = JSON.parse(xhr.responseText, reviver);
-					if (self.items) {
-						self.currentItem = self.items[0];
-					}				
+					try {
+						self.items = JSON.parse(xhr.responseText, reviver);
+						if (self.items) {
+							self.currentItem = self.items[0];
+						}
+				    } catch (e) {
+				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
+				    }				
 				}
 				xhr.send()
 			},			
