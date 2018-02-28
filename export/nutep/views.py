@@ -155,6 +155,8 @@ class EmployeesViewSet(viewsets.ModelViewSet):
 class OrderListViewSet(viewsets.ModelViewSet):
     serializer_class = PreOrderSerializer                         
     def get_queryset(self):
-        event = DateQueryEvent.objects.for_user(self.request.user).filter(status=DateQueryEvent.SUCCESS).order_by('-date').first()        
+        event = DateQueryEvent.objects.for_user(self.request.user).filter(status=DateQueryEvent.SUCCESS).order_by('-date').first()
+        if not event:
+            return PreOrder.objects.none()        
         return event.orders.filter(containertrain__isnull=False).order_by('date')
                           
