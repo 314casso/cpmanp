@@ -126,15 +126,14 @@ class PingOrderList(viewsets.ViewSet):
         key = 'last_ping_order_list'
         if cache.get(key):
             return Response({ 'job': 'cached' })
-        cache.set(key, today, 30)   
+        cache.set(key, today, 300)   
         start_date = today - timedelta(days=360)
         job = pre_order_task.delay(request.user, start_date)  # @UndefinedVariable        
         return Response({ 'job': job.id })  
  
   
 class JobStatus(viewsets.ViewSet):
-    def retrieve(self, request, pk):        
-        print request.POST       
+    def retrieve(self, request, pk):       
         queue = django_rq.get_queue('default')
         job = queue.fetch_job(pk)
         status = job.status if job else None
@@ -155,6 +154,7 @@ class EmployeesViewSet(viewsets.ModelViewSet):
                       
 class OrderListViewSet(viewsets.ModelViewSet):
     serializer_class = PreOrderSerializer                         
-    def get_queryset(self):        
-        return PreOrder.objects.for_user(self.request.user).filter(containertrain__isnull=False).order_by('date')
+    def get_queryset(self):
+        event = DateQueryEvent.objects.for_user(self.request.user).filter(status=DateQueryEvent.SUCCESS).order_by('-date').first()        
+        return event.orders.filter(containertrain__isnull=False).order_by('date')
                           

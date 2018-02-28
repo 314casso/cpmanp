@@ -149,12 +149,12 @@
 		
 		<div id="app-settings">            				
 
-            <div id="error-message" class="alert alert-danger">
+            <div v-cloak v-if="error" class="alert alert-danger">
                 <strong>Ошибка!</strong> <% error %>
             </div>
         
         </div>
-		
+				
 		<!-- Button trigger modal -->
 
 			<div class="row">
@@ -171,6 +171,7 @@
                     <div class="clearfix"></div>
                   </div>
                   <div id="app-revise" v-cloak class="x_content table-responsive">
+                                   
 
                   <table class="table table-hover">
                     <thead>
@@ -190,6 +191,8 @@
                       </tr>                    
                     </tbody>
                   </table>
+				  
+				  <div v-if="loading" class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>
 				  
 				  <div v-if="currentItem">	
 					  <h3>Таможенные процедуры для <strong><% currentItem.containertrain %></strong></h3>
@@ -323,7 +326,7 @@
     {{ revise_form.media.js }}
         
     <!-- Custom Theme Scripts -->
-    <script src="{{ STATIC_URL }}build/js/custom.js?0.012"></script>
+    <script src="{{ STATIC_URL }}build/js/custom.js?0.014"></script>
     
     <!-- Datatables -->      
        

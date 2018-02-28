@@ -5400,7 +5400,8 @@ $(function() {
 			items: [
 			],
 			currentItem: null,
-			search: null
+			search: null,
+			loading: false,
 		},
 		delimiters: ["<%", "%>"],
 		filters: {
@@ -5411,25 +5412,45 @@ $(function() {
 		  }
 		},	
 		mounted () {
-			this.pingOrders();
 			this.fetchData();
+			this.pingOrders();			
 		},
-		methods: {
-			setItemLoading: function (item) {
-				item.status = "";				
-				item.status_class = "";				
-				item.load_image = "<div class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>";
-			},		
+		methods: {			
+			checkJob: function (job) {
+				var xhr = new XMLHttpRequest()
+				var self = this;
+				if (!job) {
+					this.loading = false;
+					return;
+				}
+				xhr.open('GET', '/api/jobstatus/' + job + '/');
+				xhr.onload = function () {							
+					resp = JSON.parse(xhr.responseText);
+					console.log(resp.job);
+					if (resp.job == 'started') {						
+						setTimeout(self.checkJob, 1000, job);
+					} else {
+						self.fetchData();
+						self.loading = false;
+						if (resp.job == 'failed') {
+							appSettings.error = "Произошла ошибка обновления данных";
+						}
+					} 
+				}
+				xhr.error = function (e) {
+					self.loading = false;
+					appSettings.error = "Error " + e.target.status + " occurred while receiving the document.";
+				}
+				xhr.send();				
+			},
 			pingOrders: function () {				
 				var xhr = new XMLHttpRequest()
 				var self = this;
+				this.loading = true;
 				xhr.open('GET', '/api/pingorderlist/');
 				xhr.onload = function () {					
-					resp = JSON.parse(xhr.responseText);
-					if (resp.job != 'cached') {
-						console.log(resp);
-						setTimeout(self.fetchData, 10000);
-					} 
+					resp = JSON.parse(xhr.responseText);											
+					self.checkJob(resp.job);					 
 				}
 				xhr.send();
 			}, 
@@ -5442,18 +5463,7 @@ $(function() {
 					self.items = JSON.parse(xhr.responseText, reviver);
 					if (self.items) {
 						self.currentItem = self.items[0];
-					}					
-					var do_refresh = false;
-					self.items.forEach(function (item, i, arr) {		
-						if (item.refreshing) {
-							do_refresh = true;
-							self.setItemLoading(item);
-						}
-					});
-					
-					if (do_refresh) {						
-						setTimeout(self.fetchData, 1000);
-					}
+					}				
 				}
 				xhr.send()
 			},			

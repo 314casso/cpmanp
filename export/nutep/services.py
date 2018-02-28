@@ -49,7 +49,6 @@ class BaseEventService(WSDLService):
 class OrderService(BaseEventService):    
     def order_list(self, user, start_date):
         try:           
-            DateQueryEvent.objects.filter(date__gte=start_date).delete()
             company = user.companies.filter(membership__is_general=True).first()
             event = DateQueryEvent.objects.create(user=user, type=DateQueryEvent.PREORDER, status=DateQueryEvent.PENDING, company=company)                                             
             if company.ukt_guid:         

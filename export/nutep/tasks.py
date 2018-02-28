@@ -2,6 +2,7 @@ from django_rq import job
 from nutep.services import DealService, OrderService
 from export.local_settings import WEB_SERVISES
 import json
+from time import sleep
 
 
 @job('default')
@@ -16,7 +17,7 @@ def update_user(user):
     
 
 @job('default')
-def pre_order_task(user, start_date):            
+def pre_order_task(user, start_date):                
     service = OrderService(WEB_SERVISES['cp'])                        
     service.order_list(user, start_date)
     
