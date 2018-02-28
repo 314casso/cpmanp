@@ -274,6 +274,10 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, unique=True, related_name='profile')
     valid_till = models.DateField(blank=True, null=True)
     image = models.ImageField(upload_to=userprofile_path, blank=True, null=True,)
+        
+    @property    
+    def fullname(self):
+        return self.get_fullname()    
            
     def get_fullname(self):
         return u'%s %s %s' % (self.user.last_name, self.user.first_name, self.middle_name)    
