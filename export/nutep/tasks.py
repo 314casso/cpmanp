@@ -5,7 +5,7 @@ import json
 from time import sleep
 
 
-@job('default')
+@job('mosagr')
 def update_user(user):    
     company = user.companies.filter(membership__is_general=True).first()
     if not company:
@@ -16,7 +16,7 @@ def update_user(user):
     company.save()
     
 
-@job('default')
+@job('mosagr')
 def pre_order_task(user, start_date):                
     service = OrderService(WEB_SERVISES['cp'])                        
     service.order_list(user, start_date)
