@@ -159,19 +159,22 @@
 
 			<div class="row">
               <div class="col-md-12 col-sm-12 col-xs-12">
-                <div class="x_panel">
+                <div class="x_panel" id="app-revise" v-cloak>
+                
+                  <div v-if="loading" class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>
+                
+				  <div class="input-group">
+				    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+				    <input v-model='search' type="search" class="form-control" name="search" placeholder="Поиск контейнера...">
+				    <span class="input-group-btn">
+                      <button class="btn btn-default" v-on:click="clearSearch" type="button"><i class="glyphicon glyphicon-remove"></i></button>
+                    </span>
+				  </div>
+                
                   <div class="x_title">
-                    <h3><i class="fa fa-train"></i> Контейнерные поезда</h3>
-                    <ul class="nav navbar-right panel_toolbox">
-                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                      </li>                      
-                      <li><a class="close-link"><i class="fa fa-close"></i></a>
-                      </li>
-                    </ul>
-                    <div class="clearfix"></div>
+                    <h3><i class="fa fa-train"></i> Контейнерные поезда</h3>                    
                   </div>
-                  <div id="app-revise" v-cloak class="x_content table-responsive">
-                                   
+                  <div class="x_content table-responsive">
 
                   <table class="table table-hover">
                     <thead>
@@ -192,15 +195,28 @@
                     </tbody>
                   </table>
 				  
-				  <div v-if="loading" class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>
-				  
-				  <div v-if="currentItem">	
-					  <h3>Таможенные процедуры для <strong><% currentItem.containertrain %></strong></h3>
-	                  
-	                  <div class="input-group">
-					    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-					    <input v-model='search' type="text" class="form-control" name="search" placeholder="Поиск контейнера...">
-					  </div>
+				  <div v-for="item in selectedItems()">
+				     
+				     <div v-if="itemHasContainers( item )">	
+					  <h3><i class="fa fa-gear"></i> Таможенные процедуры для <% item.containertrain %></h3>
+					  
+					  <table class="table">
+	                    <thead>
+	                      <tr>                   
+	                        <th>Прибытие на станцию</th>
+	                        <th>Подача на МАНП</th>
+	                        <th>Закрытие доставки</th>
+	                      </tr>
+	                    </thead>
+	                    <tbody>
+	                      <tr class="info">
+	                        <td><% item.arrivaldate | moment %></td>
+							<td><% item.feeddate | moment %></td>
+							<td><% item.deliverystopdate | moment %></td>                                           
+	                      </tr>                    
+	                    </tbody>
+	                  </table>
+	                                    
 	                  
 	                  <table class="table table-hover">
 	                    <thead>
@@ -213,16 +229,14 @@
 	                      </tr>
 	                    </thead>
 	                    <tbody>
-	                      <tr class="datarow" v-for="container in currentContainers()">
+	                      <tr class="datarow" v-for="container in itemContainers( item )">
 	                        <th scope="row"><% container.number %></th>
 	                        <td><% container.size %><% container.type %></td>
 							<td><% container.releasedate | moment %></td>  
 							<td>
 								<ul v-if="container.procedures" class="list-group" style="margin-bottom: 0">
-									<li class="list-group-item" v-for="procedure in container.procedures">
-										<i class="glyphicon glyphicon-pushpin"></i>
+									<li class="list-group-item list-group-item-success" v-for="procedure in container.procedures">										
 										<strong><% procedure.procedure %></strong>
-										
 										
 										<span title="Дата начала и дата окончания" v-if='procedure.startdate' class="label label-info">																					
 										<% procedure.startdate | moment %> 
@@ -233,17 +247,14 @@
 										<span class="text-muted">										
 											<% procedure.note %>
 										</span>
-										
-										<small title="События по процедуре">
-										<ul v-if="procedure.logs">
+										<ul title="События по процедуре" v-if="procedure.logs">
 											<li v-for="log in procedure.logs">
 												<% log.date | moment %>												
 												<span class="text-primary">										
 													<% log.note %>
 												</span>												
 											</li>
-										</ul>
-										</small>
+										</ul>										
 									</li>
 								</ul>
 							</td>                                          
@@ -251,6 +262,8 @@
 	                    </tbody>
 	                  </table>
                   </div>
+                    
+                   </div> 
                                     
                   </div>
                 </div>
@@ -326,7 +339,7 @@
     {{ revise_form.media.js }}
         
     <!-- Custom Theme Scripts -->
-    <script src="{{ STATIC_URL }}build/js/custom.js?0.016"></script>
+    <script src="{{ STATIC_URL }}build/js/custom.js?0.017"></script>
     
     <!-- Datatables -->      
        

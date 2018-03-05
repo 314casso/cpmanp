@@ -5401,7 +5401,7 @@ $(function() {
 			],
 			currentItem: null,
 			search: null,
-			loading: false,
+			loading: false			
 		},
 		delimiters: ["<%", "%>"],
 		filters: {
@@ -5468,7 +5468,7 @@ $(function() {
 					try {
 						self.items = JSON.parse(xhr.responseText, reviver);
 						if (self.items) {
-							self.currentItem = self.items[0];
+							self.currentItem = self.items[self.items.length - 1];
 						}
 				    } catch (e) {
 				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
@@ -5482,18 +5482,35 @@ $(function() {
 			setCurrentItem: function (item) {
 				this.currentItem = item;				
 			},
-			currentContainers: function () {
-				if (this.currentItem) {
-					var containers = this.currentItem.containers;
+			itemContainers: function (item) {
+				if (item) {
+					var containers = item.containers;
 					var self = this;
 					return containers.filter(function (cont) {
 						if (!self.search) {
 							return true;							
-						}
-						return cont.number.search(self.search) != -1; 
+						}						
+						return cont.number.search(new RegExp(self.search, "i")) != -1; 
 					});				
-				} 
+				}				
+			},
+			itemHasContainers: function (item) {
+				return this.itemContainers(item).length > 0;
+			},  
+			currentContainers: function () {
+				return this.itemContainers()
 			}, 
+			selectedItems: function () {
+				if (!this.search) {
+					if (this.currentItem) {
+						return [this.currentItem];
+					}
+				}
+				return this.items;
+			},
+			clearSearch: function () {
+				this.search = null;
+			}
 		}
 	});
 	
