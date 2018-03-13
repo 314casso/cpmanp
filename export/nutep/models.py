@@ -59,8 +59,7 @@ class DateQueryEvent(models.Model):
         (SUCCESS, u'Обработано'),
         (ERROR, u'Ошибка'),
     )
-    
-    
+        
     PREORDER = 1    
         
     TYPE_CHOICES = (
@@ -111,6 +110,7 @@ class Container(models.Model):
     line = models.CharField(blank=True, null=True, max_length=150)
     transport = models.CharField(blank=True, null=True, max_length=50)
     releasedate = models.DateTimeField(blank=True, db_index=True, null=True)
+    dateout = models.DateTimeField(blank=True, db_index=True, null=True)
     pre_order = models.ForeignKey(PreOrder, related_name="containers")
     
     def __unicode__(self):
