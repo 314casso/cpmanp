@@ -112,6 +112,7 @@ class Container(models.Model):
     releasedate = models.DateTimeField(blank=True, db_index=True, null=True)
     dateout = models.DateTimeField(blank=True, db_index=True, null=True)
     pre_order = models.ForeignKey(PreOrder, related_name="containers")
+    driver = models.CharField(blank=True, null=True, max_length=150)
     
     def __unicode__(self):
         return u'{0}'.format(self.number)

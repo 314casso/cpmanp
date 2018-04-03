@@ -225,6 +225,8 @@
 	                        <th>Размер и тип</th>
 	                        <th>Выпуск / ВТТ</th>
 	                        <th>Дата ухода</th>
+	                        <th>Авто</th>
+	                        <th>Водитель</th>
 	                        <th>Таможенные процедуры</th>
 	                        
 	                      </tr>
@@ -235,6 +237,8 @@
 	                        <td><% container.size %><% container.type %></td>
 							<td><% container.releasedate | moment %></td>  
 							<td><% container.dateout | moment %></td>
+							<td><% container.transport %></td>
+							<td><% container.driver %></td>
 							<td>
 								<ul v-if="container.procedures" class="list-group" style="margin-bottom: 0">
 									<li class="list-group-item list-group-item-success" v-for="procedure in container.procedures">										
