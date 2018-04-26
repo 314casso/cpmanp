@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 import datetime
+import hashlib
 import os
 
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.fields import GenericForeignKey,\
+from django.contrib.contenttypes.fields import GenericForeignKey, \
     GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
-from django.utils.encoding import force_unicode
-from uuslug import slugify
-from django.utils.translation import ugettext_lazy as _
-import hashlib
-from django.contrib.postgres.fields.jsonb import JSONField
 from django.contrib.postgres.fields.array import ArrayField
+from django.contrib.postgres.fields.jsonb import JSONField
+from django.db import models
+from django.urls import reverse
+from django.utils.encoding import force_unicode
+from django.utils.translation import ugettext_lazy as _
+from uuslug import slugify
+
+from nutep.utils import parse_nav
 
 
 def base_path(root, filename):    
@@ -47,6 +50,13 @@ class PrivateManager(models.Manager):
         return super(PrivateManager, self).get_queryset().filter(user=user)
     
 
+PREORDER = 1    
+        
+TYPE_CHOICES = (
+    (PREORDER, u'Предварительные заявки'),        
+)
+
+
 class DateQueryEvent(models.Model):
     UNKNOWN = 300    
     PENDING = 100
@@ -58,12 +68,6 @@ class DateQueryEvent(models.Model):
         (PENDING, u'В обработке'),
         (SUCCESS, u'Обработано'),
         (ERROR, u'Ошибка'),
-    )
-        
-    PREORDER = 1    
-        
-    TYPE_CHOICES = (
-        (PREORDER, u'Предварительные заявки'),        
     )
     
     date = models.DateTimeField(blank=True, auto_now=True, db_index=True, null=True)
@@ -83,8 +87,8 @@ class DateQueryEvent(models.Model):
 class PreOrderManager(PrivateManager):
     def for_user(self, user):
         if not user:
-            return super(PrivateManager, self).get_queryset().none()
-        return super(PrivateManager, self).get_queryset().filter(event__user=user)
+            return super(PreOrderManager, self).get_queryset().none()
+        return super(PreOrderManager, self).get_queryset().filter(event__user=user)
 
 
 class PreOrder(models.Model):
@@ -113,6 +117,7 @@ class Container(models.Model):
     dateout = models.DateTimeField(blank=True, db_index=True, null=True)
     pre_order = models.ForeignKey(PreOrder, related_name="containers")
     driver = models.CharField(blank=True, null=True, max_length=150)
+    files = GenericRelation('File')
     
     def __unicode__(self):
         return u'{0}'.format(self.number)
@@ -149,6 +154,14 @@ class File(models.Model):
         return force_unicode(self.title) 
 
 
+class ClientService(models.Model):    
+    name = models.CharField(max_length=150)   
+    type = models.IntegerField(choices=TYPE_CHOICES, unique=True)
+    nav = models.CharField(max_length=150)       
+    def __unicode__(self):
+        return u'{0}'.format(self.name)
+
+
 class Team(models.Model):
     name = models.CharField('Наименование', max_length=150, db_index=True)
     users = models.ManyToManyField(User, blank=True, related_name="teams")
@@ -161,15 +174,19 @@ class Team(models.Model):
 
 
 class Company(models.Model):
+    DASHBOARD_VIEW = 'dashboard'
     crm_guid = models.CharField(max_length=36, blank=True, null=True)
     ukt_guid = models.CharField(max_length=36, blank=True, null=True)
     name = models.CharField('Наименование', max_length=150, db_index=True)
+    dashboard_view = models.CharField(max_length=50, blank=True, null=True)
     members = models.ManyToManyField(User, blank=True, related_name="companies", through='Membership')
+    client_services = models.ManyToManyField(ClientService, blank=True, related_name="companies", through='CompanyService')    
     details = JSONField(blank=True, null=True,)
     INN = models.CharField(_('INN'), max_length=14, blank=True, null=True,)   
     KPP = models.CharField(_('KPP'), max_length=10, blank=True, null=True,)    
-    logo = models.ImageField(upload_to=userprofile_path, blank=True, null=True,)
-    
+    logo = models.ImageField(upload_to=userprofile_path, blank=True, null=True,)    
+    def get_dashboard_url(self):        
+        return reverse(self.dashboard_view if self.dashboard_view else self.DASHBOARD_VIEW)
     def __unicode__(self):
         return u'{0}'.format(self.name) 
     class Meta:
@@ -183,6 +200,26 @@ class Membership(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)    
     is_general = models.BooleanField(default=False)
     is_payer = models.BooleanField(default=False)
+    def __unicode__(self):
+        return u'{0}{1}'.format(self.user, self.company) 
+
+
+class CompanyService(models.Model):
+    client_service = models.ForeignKey(ClientService, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="services")    
+    title = models.CharField(max_length=150, blank=True, null=True,)   
+    nav = models.CharField(max_length=150, blank=True, null=True,)   
+    is_active = models.BooleanField(default=False)
+    is_menu = models.BooleanField(default=True)        
+    order = models.IntegerField(default=100)        
+    def get_nav_url(self):
+        nav = self.nav if self.nav else self.client_service.nav
+        return parse_nav(nav)
+    def __unicode__(self):
+        return u'{0}'.format(self.title if self.title else self.client_service) 
+    class Meta:
+        unique_together = ("company", "client_service")
+        ordering = ['order']
 
 
 class BaseModelManager(models.Manager):    
@@ -244,7 +281,7 @@ class BaseError(models.Model):
     MODEL = 2
     UNKNOWN = 3 
     WEBFAULT = 4   
-    
+        
     TYPE_CHOICES = (
         (XML, force_unicode('Ошибка учетной системы')),
         (WEBFAULT, force_unicode('Ошибка обмена данных')),

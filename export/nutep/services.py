@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from django.core.files.base import ContentFile
-from export.local_settings import WEB_SERVISES
-from nutep.odata import CRM, Portal
-from nutep.models import Employee, DateQueryEvent, Container,\
-    BaseError, PreOrder, CustomsProcedure, ProcedureLog
 import base64
+import traceback
+
+from django.core.files.base import ContentFile
 from requests import Session
-from requests.auth import HTTPBasicAuth  # or HTTPDigestAuth, or OAuth1, etc.
+from requests.auth import HTTPBasicAuth
 from zeep import Client, helpers
 from zeep.transports import Transport
+
+from export.local_settings import WEB_SERVISES
+from nutep.models import BaseError, Container, CustomsProcedure, \
+    DateQueryEvent, Employee, PREORDER, PreOrder, ProcedureLog
+from nutep.odata import CRM, Portal
 
 
 class WSDLService(object):
@@ -36,21 +39,21 @@ class DealService(WSDLService):
 
 
 class BaseEventService(WSDLService):    
-    def log_event_error(self, e, event):
+  def log_event_error(self, e, event, data=None):
         base_error = BaseError()
         base_error.content_object = event
         base_error.type = BaseError.UNKNOWN
-        base_error.message = e
+        base_error.message = u'%s\n%s' % (e, data)
         base_error.save()  
         event.status = DateQueryEvent.ERROR
-        event.save()         
+        event.save()          
     
             
 class OrderService(BaseEventService):    
     def order_list(self, user, start_date):
         try:           
             company = user.companies.filter(membership__is_general=True).first()
-            event = DateQueryEvent.objects.create(user=user, type=DateQueryEvent.PREORDER, status=DateQueryEvent.PENDING, company=company)                                             
+            event = DateQueryEvent.objects.create(user=user, type=PREORDER, status=DateQueryEvent.PENDING, company=company)                                             
             if company.ukt_guid:         
                 response = self._client.service.AdvanceOrderList(company.ukt_guid, start_date)                                  
                 if hasattr(response, 'report') and response.report:
@@ -69,8 +72,16 @@ class OrderService(BaseEventService):
                         data_dict = helpers.serialize_object(container_row)
                         if not data_dict:
                             continue 
-                        data_dict = {k: v for k, v in data_dict.iteritems() if k not in ['procedures']}
-                        container = Container.objects.create(pre_order=pre_order, **data_dict)
+                        data_dict = {k: v for k, v in data_dict.iteritems() if k not in ['procedures', 'attachments']}
+                        container = Container.objects.create(pre_order=pre_order, **data_dict)                        
+                        for attachment_row in container_row.attachments:                            
+                            data_dict = helpers.serialize_object(attachment_row)
+                            if not data_dict:
+                                continue 
+                            file_data = data_dict['data']
+                            filename = u'%s.%s' %  (data_dict['name'], data_dict['extension'])
+                            file_store = container.files.create(title=filename)             
+                            file_store.file.save(filename, ContentFile(file_data))
                         for procedure_row in container_row.procedures:                            
                             data_dict = helpers.serialize_object(procedure_row)
                             if not data_dict:
@@ -85,8 +96,9 @@ class OrderService(BaseEventService):
                             
             event.status = DateQueryEvent.SUCCESS
             event.save()
-        except Exception, e:            
-            self.log_event_error(e, event)                                     
+        except Exception, e:
+            tb = traceback.format_exc()
+            self.log_event_error(e, event, tb)
             
 
 class CRMService(object):

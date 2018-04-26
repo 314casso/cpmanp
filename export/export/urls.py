@@ -24,7 +24,7 @@ urlpatterns = [
 
 urlpatterns += [ 
     url(r'^$', landing, name='landing'), 
-    url(r'^services/$', ServiceView.as_view(), name='services'),       
+    url(r'^dashboard/$', ServiceView.as_view(), name='dashboard'),       
 ]
 
 urlpatterns += [

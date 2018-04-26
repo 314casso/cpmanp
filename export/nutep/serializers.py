@@ -39,6 +39,7 @@ class CustomsProcedureSerializer(serializers.ModelSerializer):
 
 class ContainerSerializer(serializers.ModelSerializer):
     procedures = CustomsProcedureSerializer(many=True)
+    files = FileSerializer(many=True)
     class Meta:
         model = Container
         fields = '__all__'

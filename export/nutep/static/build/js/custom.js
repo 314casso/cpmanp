@@ -5385,7 +5385,7 @@ $(function() {
 	});
 	
 	const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
-
+	
 	function reviver(key, value) {
 	    if (typeof value === "string" && dateFormat.test(value)) {
 	        return new Date(value);
@@ -5393,7 +5393,7 @@ $(function() {
 	    
 	    return value;
 	}
-	
+		
 	var appRevise = new Vue({
 		el: '#app-revise',
 		data: {
@@ -5403,7 +5403,7 @@ $(function() {
 			search: null,
 			loading: false			
 		},
-		delimiters: ["<%", "%>"],
+		delimiters: ["<%", "%>"],		
 		filters: {
 		  moment: function (date) {
 			  if (date) {
@@ -5424,7 +5424,7 @@ $(function() {
 					return;
 				}
 				xhr.open('GET', '/api/jobstatus/' + job + '/');
-				xhr.onload = function () {	
+				xhr.onload = function () {
 					try {
 						resp = JSON.parse(xhr.responseText);
 				    } catch (e) {
@@ -5432,7 +5432,7 @@ $(function() {
 				    }
 					
 					console.log(resp.job);
-					if (resp.job == 'started') {						
+					if (resp.job == 'started') {
 						setTimeout(self.checkJob, 1000, job);
 					} else {
 						self.fetchData();
@@ -5440,7 +5440,7 @@ $(function() {
 						if (resp.job == 'failed') {
 							appSettings.error = "Произошла ошибка обновления данных";
 						}
-					} 
+					}
 				}
 				xhr.error = function (e) {
 					self.loading = false;
@@ -5477,7 +5477,11 @@ $(function() {
 				xhr.send()
 			},			
 			open: function (url) {
-				window.location.href = url;
+				window.open(
+					url,
+					'_blank'
+				  );
+				  return false;			
 			},
 			setCurrentItem: function (item) {
 				this.currentItem = item;				
@@ -5526,19 +5530,18 @@ $(function() {
 				appRevise.fetchData();
 			},			
 			setItemLoading: function () {
-				 $(this.$el).find('.loading').fadeIn();				 
-				 this.error = "";
-				 $(this.$el).find('#error-message').fadeOut(); 
+				$(this.$el).find('.loading').fadeIn();
+				this.error = "";
+				$(this.$el).find('#error-message').fadeOut();
 			},
 			removeItemLoading: function () {
-				$(self.$el).find('.loading').hide(); 
+				$(self.$el).find('.loading').hide();
 			},
 			refresh: function () {
 				var self = this;
 				self.setItemLoading();
-				self.fetchData();				
+				self.fetchData();
 				$(self.$el).find('.loading').hide();
-				
 			},
 		},
 	});			

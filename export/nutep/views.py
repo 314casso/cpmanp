@@ -5,31 +5,28 @@ from __future__ import division
 import datetime
 import json
 import logging
+from datetime import timedelta
 
+import django_rq
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+from django.core.cache import cache
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_unicode
+from django.utils.timezone import now
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import SingleObjectMixin
-import django_rq
-
-from rest_framework import viewsets, permissions
+from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from nutep.forms import ReviseForm, TrackingForm
-from nutep.models import DateQueryEvent, PreOrder
-from nutep.serializers import UserSerializer, EventStatusSerializer, EmployeesSerializer,\
-    PreOrderSerializer
-
-from django.utils.timezone import now
-from datetime import timedelta
+from nutep.models import Company, DateQueryEvent, PreOrder
+from nutep.serializers import EmployeesSerializer, EventStatusSerializer, \
+    PreOrderSerializer, UserSerializer
 from nutep.tasks import pre_order_task
-from django.core.cache import cache
 
 
 logger = logging.getLogger('django.request')
@@ -53,6 +50,8 @@ class BaseView(TemplateView):
     def dispatch(self, *args, **kwargs):
         return super(BaseView, self).dispatch(*args, **kwargs)
     
+    def get_company(self):
+        return self.request.user.companies.filter(membership__is_general=True).first()
         
     def get_dealstats(self, dateformat="%d.%m.%Y %H:%M:%S"):
         company = self.request.user.companies.filter(membership__is_general=True).first()
@@ -64,7 +63,7 @@ class BaseView(TemplateView):
             result['dealdate'] = datetime.datetime.strptime(deal_stats.get('FirstDeal'), dateformat)
             result['totaldeals'] = deal_stats.get('TotalDeals')
             result['lastmonth'] = deal_stats.get('LastMonth')
-            result['days_together'] = (datetime.datetime.now() - result['dealdate']).days
+            result['days_together'] = (datetime.datetime.now() - result['dealdate']).days            
             return result
 
     def get_context_data(self, **kwargs):
@@ -77,8 +76,6 @@ class BaseView(TemplateView):
             if head:
                 head.title = u"Руководитель менеджера"
         
-#         dealstats = self.get_dealstats()
-        
         start_date = datetime.date.today().replace(day=1)
         revise_form = ReviseForm(user=self.request.user, initial={'start_date': start_date.strftime('%d.%m.%Y')})
         tracking_form = TrackingForm(user=self.request.user)
@@ -86,25 +83,24 @@ class BaseView(TemplateView):
         context.update({
             'title': force_unicode('МАНП Онлайн'), 
             'manager': manager,
-            'head': head,
-#             'dealstats': dealstats,
-            'revise_form': revise_form,
-            'tracking_form': tracking_form,
+            'head': head,            
+            'company': self.get_company(),
         })         
         return context
 
 
-def landing(request):
+def landing(request):    
     if request.user.is_authenticated():
-        return redirect('services')
-    context = {
-        'title': force_unicode('Рускон'),
-    }
-    return render(request, 'landing.html', context)
+        company = request.user.companies.filter(membership__is_general=True).first()        
+        if company:
+            return redirect(company.get_dashboard_url())                    
+        return redirect(Company.DASHBOARD_VIEW)
+    else:
+        return redirect('login')
 
 
 class ServiceView(BaseView):
-    template_name = 'base.html'
+    template_name = 'dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super(ServiceView, self).get_context_data(**kwargs)

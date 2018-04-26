@@ -1,0 +1,163 @@
+{% extends "app/base_site.html" %}
+
+{% block title %}{% endblock title %}
+
+{% block stylesheets %}
+  {{ block.super }}    
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="right_col" role="main">
+
+<div class="clearfix"></div>
+
+<div id="app-settings">
+
+    <div v-cloak v-if="error" class="alert alert-danger">
+        <strong>Ошибка!</strong>
+        <% error %>
+    </div>
+
+</div>
+          
+  <!-- Button trigger modal -->
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel" id="app-revise" v-cloak>
+          
+            <div v-if="loading" class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>
+          
+            <div class="input-group">
+              <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+              <input v-model='search' type="search" class="form-control" name="search" placeholder="Поиск контейнера...">
+              <span class="input-group-btn">
+                <button class="btn btn-default" v-on:click="clearSearch" type="button"><i class="glyphicon glyphicon-remove"></i></button>
+              </span>
+            </div>
+          
+            <div class="x_title">
+              <h3><i class="fa fa-train"></i> Контейнерные поезда</h3>
+            </div>
+            <div class="x_content table-responsive">
+
+            <table class="table table-hover">
+              <thead>
+                <tr>                    
+                  <th>Номер поезда</th>                            
+                  <th>Прибытие на станцию</th>
+                  <th>Подача на МАНП</th>
+                  <th>Закрытие доставки</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="datarow" role="button" v-for="item in items" v-on:click="setCurrentItem(item)" v-bind:class="{active: item == currentItem }">
+                  <th scope="row"><% item.containertrain %></th>
+                  <td><% item.arrivaldate | moment %></td>
+                  <td><% item.feeddate | moment %></td>
+                  <td><% item.deliverystopdate | moment %></td>                                           
+                </tr>                    
+              </tbody>
+            </table>
+            
+            <div v-for="item in selectedItems()">
+               
+               <div v-if="itemHasContainers( item )">	
+                <h3><i class="fa fa-gear"></i> Таможенные процедуры для <% item.containertrain %></h3>
+                
+                <table class="table">
+                  <thead>
+                    <tr>                   
+                      <th>Прибытие на станцию</th>
+                      <th>Подача на МАНП</th>
+                      <th>Закрытие доставки</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="info">
+                      <td><% item.arrivaldate | moment %></td>
+                      <td><% item.feeddate | moment %></td>
+                      <td><% item.deliverystopdate | moment %></td>                                           
+                    </tr>                    
+                  </tbody>
+                </table>
+                                  
+                
+                <table class="table table-hover">
+                  <thead>
+                    <tr>                                                
+                      <th>Контейнер</th>
+                      <th>Размер и тип</th>
+                      <th>Выпуск / ВТТ</th>
+                      <th>Дата ухода</th>
+                      <th>Авто</th>
+                      <th>Водитель</th>
+                      <th>Файлы</th>
+                      <th>Таможенные процедуры</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="datarow" v-for="container in itemContainers( item )">
+                      <th scope="row"><% container.number %></th>
+                      <td><% container.size %><% container.type %></td>
+                      <td><% container.releasedate | moment %></td>  
+                      <td><% container.dateout | moment %></td>
+                      <td><% container.transport %></td>
+                      <td><% container.driver %></td>
+                      <td>
+                        <ul v-if="container.files" class="list-group" style="margin-bottom: 0">
+                          <a href="#" v-on:click.prevent="open(file.file)" class="list-group-item list-group-item-default" v-for="file in container.files">
+                            <strong>
+                              <% file.title %>
+                            </strong>
+                          </a>
+                        </ul>
+                      </td>
+                      <td>
+                          <ul v-if="container.procedures" class="list-group" style="margin-bottom: 0">
+                              <li class="list-group-item list-group-item-success" v-for="procedure in container.procedures">										
+                                  <strong><% procedure.procedure %></strong>
+                                  
+                                  <span title="Дата начала и дата окончания" v-if='procedure.startdate' class="label label-info">																					
+                                  <% procedure.startdate | moment %> 
+                                  <span v-if='procedure.enddate'> - <% procedure.enddate | moment %></span> 
+                                  </span>
+                                  
+                                  <br>			
+                                  <span class="text-muted">										
+                                      <% procedure.note %>
+                                  </span>
+                                  <ul title="События по процедуре" v-if="procedure.logs">
+                                      <li v-for="log in procedure.logs">
+                                          <% log.date | moment %>												
+                                          <span class="text-primary">										
+                                              <% log.note %>
+                                          </span>												
+                                      </li>
+                                  </ul>										
+                              </li>
+                          </ul>
+                      </td>                                          
+                    </tr>                    
+                  </tbody>
+                </table>
+            </div>
+              
+             </div> 
+                              
+            </div>
+          </div>
+        </div>
+     </div>       
+  </div>    
+{% endblock content %}
+
+{% block javascripts %}
+  {{ block.super }}
+  <script src="/static/js/lodash/lodash.min.js"></script>
+  <script src="/static/vendors/bootstrap-fileinput/js/fileinput.min.js"></script>
+  <script src="/static/vendors/bootstrap-fileinput/js/locales/ru.js"></script>
+  <script src="/static/vendors/vue/vue.min.js"></script>
+  <script src="/static/build/js/custom.js?0.0.3"></script>
+{% endblock javascripts %}

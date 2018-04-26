@@ -42,7 +42,7 @@ LANGUAGE_CODE = 'ru-RU'
 DEFAULT_LANGUAGE = 'ru'
 LANGUAGES = [('ru', u'Русский')]
 
-LOGIN_REDIRECT_URL = '/services'
+LOGIN_REDIRECT_URL = '/'
 
 SITE_ID = 1
 

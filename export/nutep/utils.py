@@ -1,6 +1,7 @@
 from urlparse import urlparse
 
 from django.http import QueryDict
+from django.urls import reverse
 from django.utils.encoding import iri_to_uri
 from django.utils.timezone import now
 
@@ -34,3 +35,20 @@ def is_user_valid(user):
     if user.profile.valid_till < now():
         return False
     return True
+
+
+def parse_nav(nav):
+    if not nav:
+        return "#"
+    if nav.find("/") != -1 or nav.find("#") != -1:            
+        return nav                                    
+    return reverse(nav)    
+
+
+def set_properties(obj, data_dict, exclude=None):
+    if not data_dict:
+        return None    
+    for key, value in data_dict.iteritems():
+        if (exclude and key in exclude) or not hasattr(obj, key):
+            continue        
+        setattr(obj, key, value)
