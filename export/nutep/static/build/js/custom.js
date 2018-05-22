@@ -5489,7 +5489,7 @@ $(function() {
 							  );							  
 						}
 				    } catch (e) {
-				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
+				    	appSettings.error = "Произошла ошибка обновления данных: " + e + ": " + xhr.responseText;
 				    }				
 				}
 				xhr.send()										
