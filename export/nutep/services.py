@@ -28,6 +28,7 @@ class WSDLService(object):
         
         session = Session()
         session.auth = HTTPBasicAuth(self.username, self.password)         
+        session.verify = False
         self._client = Client(self.url, strict=False, transport=Transport(session=session, timeout=500))  
 
 
