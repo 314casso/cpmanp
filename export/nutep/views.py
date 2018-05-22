@@ -11,7 +11,7 @@ import django_rq
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_unicode
@@ -138,14 +138,13 @@ class JobStatus(viewsets.ViewSet):
         return Response({ 'job': status })
     
 
-class GetFileDate(viewsets.ViewSet):
-    def retrieve(self, request, pk):   
-        service = AttachedFileService(WEB_SERVISES['cp'])                        
-        file_store = service.set_file_data(self.request.user, pk)                            
-        url = '#'
-        if file_store.file:
-            url = file_store.file.url
-        return Response({ 'url':  url})
+def get_file_url(request, pk):   
+    service = AttachedFileService(WEB_SERVISES['cp'])                        
+    file_store = service.set_file_data(request.user, pk)                            
+    url = '#'
+    if file_store.file:
+        url = file_store.file.url
+    return JsonResponse({ 'url':  url})
 
 
 class EventViewSet(viewsets.ModelViewSet):    

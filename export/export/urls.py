@@ -6,6 +6,8 @@ from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from nutep.views import landing, ServiceView
+from nutep import views
+
 
 admin.autodiscover()
 
@@ -32,6 +34,10 @@ urlpatterns += [
 ]
 
 urlpatterns += [
+    url(r'^getfileurl/(?P<pk>.*)/$', views.get_file_url, name='getfileurl'),
+]
+
+urlpatterns += [
     url(r'^django-rq/', include('django_rq.urls')),
 ]
 
@@ -41,7 +47,6 @@ urlpatterns += [
 ]
 
 from rest_framework import routers
-from nutep import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
@@ -50,7 +55,7 @@ router.register(r'employees', views.EmployeesViewSet, 'employees')
 router.register(r'jobstatus', views.JobStatus, 'jobstatus')
 router.register(r'pingorderlist', views.PingOrderList, 'pingorderlist')
 router.register(r'orderlist', views.OrderListViewSet, 'orderlist')
-router.register(r'getfiledate', views.GetFileDate, 'getfiledate')
+#router.register(r'getfiledate', views.GetFileDate, 'getfiledate')
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
