@@ -14,6 +14,31 @@ from nutep.models import BaseError, Container, CustomsProcedure, \
     DateQueryEvent, Employee, PREORDER, PreOrder, ProcedureLog, File
 from nutep.odata import CRM, Portal
 
+import base64
+from suds.cache import NoCache
+from suds.client import Client
+from suds.transport.https import HttpAuthenticated
+
+
+class SudsService(object):
+    username = None
+    password = None
+    url = None
+    def __init__(self, settings):
+        self.set_client(settings)
+
+    def set_client(self, settings):
+        for key in settings.iterkeys():
+            setattr(self, key, settings.get(key))
+        base64string = base64.encodestring(
+            '%s:%s' % (self.username, self.password)).replace('\n', '')
+        authenticationHeader = {
+            "SOAPAction" : "ActionName",
+            "Authorization" : "Basic %s" % base64string
+        }
+        t = HttpAuthenticated(username=self.username, password=self.password)
+        self._client = Client(self.url, headers=authenticationHeader, transport=t, cache=NoCache(), timeout=500)
+
 
 class WSDLService(object):
     username = None
@@ -39,7 +64,7 @@ class DealService(WSDLService):
         return response      
 
 
-class AttachedFileService(WSDLService):    
+class AttachedFileService(SudsService):    
     def get_attachement(self, user, file_guid):                
         file_store = File.objects.filter(guid=file_guid).last()
         if not file_store:
