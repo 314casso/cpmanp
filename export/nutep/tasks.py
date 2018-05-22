@@ -1,8 +1,9 @@
-from django_rq import job
-from nutep.services import DealService, OrderService
-from export.local_settings import WEB_SERVISES
 import json
-from time import sleep
+
+from django_rq import job
+
+from export.local_settings import WEB_SERVISES
+from nutep.services import AttachedFileService, DealService, OrderService
 
 
 @job('mosagr')
@@ -20,6 +21,9 @@ def update_user(user):
 def pre_order_task(user, start_date):                
     service = OrderService(WEB_SERVISES['cp'])                        
     service.order_list(user, start_date)
-    
-                        
-                
+
+
+def get_attachement(user, guid):
+    service = AttachedFileService(WEB_SERVISES['cp'])                        
+    file_store = service.get_attachement(user, guid)
+    return file_store

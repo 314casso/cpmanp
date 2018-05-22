@@ -28,7 +28,7 @@ from nutep.models import Company, DateQueryEvent, PreOrder
 from nutep.serializers import EmployeesSerializer, EventStatusSerializer, \
     PreOrderSerializer, UserSerializer
 from nutep.services import AttachedFileService
-from nutep.tasks import pre_order_task
+from nutep.tasks import get_attachement, pre_order_task
 
 
 logger = logging.getLogger('django.request')
@@ -138,13 +138,12 @@ class JobStatus(viewsets.ViewSet):
         return Response({ 'job': status })
     
 
-def get_file_url(request, pk):   
-    service = AttachedFileService(WEB_SERVISES['cp'])                        
-    file_store = service.set_file_data(request.user, pk)                            
-    url = '#'
-    if file_store.file:
-        url = file_store.file.url
-    return JsonResponse({ 'url':  url})
+def get_file_url(request, pk):                                   
+    get_attachement(request, pk)
+    # url = '#'
+    # if file_store.file:
+    #     url = file_store.file.url
+    return JsonResponse({ 'url':  'ok'})
 
 
 class EventViewSet(viewsets.ModelViewSet):    

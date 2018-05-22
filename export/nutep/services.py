@@ -40,7 +40,7 @@ class DealService(WSDLService):
 
 
 class AttachedFileService(WSDLService):    
-    def set_file_data(self, user, file_guid):                
+    def get_attachement(self, user, file_guid):                
         file_store = File.objects.filter(guid=file_guid).last()
         if not file_store:
             return                
