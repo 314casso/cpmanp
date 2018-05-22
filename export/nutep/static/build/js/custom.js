@@ -5476,9 +5476,9 @@ $(function() {
 				xhr.send()
 			},			
 			open: function (file) {
-				var xhr = new XMLHttpRequest()
+				var xhr = new XMLHttpRequest();
 				var self = this;
-				xhr.open('GET', '/api/getfiledate/' + file.guid + '/');
+				xhr.open('GET', '/getfileurl/' + file.guid + '/');
 				xhr.onload = function () {					
 					try {
 						var data = JSON.parse(xhr.responseText);						
@@ -5486,13 +5486,14 @@ $(function() {
 							window.open(
 								data.url,
 								'_blank'
-							  );							  
+							  );
+							  return false;							  
 						}
 				    } catch (e) {
 				    	appSettings.error = "Произошла ошибка обновления данных: " + e + ": " + xhr.responseText;
 				    }				
 				}
-				xhr.send()										
+				xhr.send();														
 			},
 			setCurrentItem: function (item) {
 				this.currentItem = item;				

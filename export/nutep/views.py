@@ -139,11 +139,11 @@ class JobStatus(viewsets.ViewSet):
     
 
 def get_file_url(request, pk):                                   
-    get_attachement(request, pk)
-    # url = '#'
-    # if file_store.file:
-    #     url = file_store.file.url
-    return JsonResponse({ 'url':  'ok'})
+    file_store = get_attachement(request, pk)
+    url = '#'
+    if file_store.file:
+        url = file_store.file.url
+    return JsonResponse({ 'url':  url })
 
 
 class EventViewSet(viewsets.ModelViewSet):    

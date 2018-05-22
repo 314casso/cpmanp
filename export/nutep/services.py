@@ -69,10 +69,10 @@ class AttachedFileService(SudsService):
         file_store = File.objects.filter(guid=file_guid).last()
         if not file_store:
             return                
-        response = self._client.service.GetAttachment(file_store.guid, file_store.storage)                        
-        # data_dict = helpers.serialize_object(response)        
-        # if data_dict and 'data' in data_dict['data']:
-        #     file_store.file.save(file_store.title, ContentFile(data_dict['data']))
+        xml_attachment = self._client.service.GetAttachedFile(file_store.guid, file_store.storage)                                
+        if xml_attachment:
+            data = base64.b64decode(xml_attachment.data)
+            file_store.file.save(file_store.title, ContentFile(data))
         return file_store
                 
 
