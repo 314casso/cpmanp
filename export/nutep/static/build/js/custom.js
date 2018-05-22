@@ -5478,16 +5478,12 @@ $(function() {
 			open: function (file) {
 				var xhr = new XMLHttpRequest();
 				var self = this;
-				xhr.open('GET', '/getfileurl/' + file.guid + '/', false);
+				xhr.open('GET', '/getfileurl/' + file.guid + '/');
 				xhr.onload = function () {					
 					try {
 						var data = JSON.parse(xhr.responseText);						
 						if (data.url) {
-							window.open(
-								data.url,
-								'_blank'
-							  );
-							  return false;							  
+							window.location = data.url;							
 						}
 				    } catch (e) {
 				    	appSettings.error = "Произошла ошибка обновления данных: " + e + ": " + xhr.responseText;
