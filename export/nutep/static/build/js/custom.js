@@ -5459,8 +5459,7 @@ $(function() {
 				}
 				xhr.send();
 			}, 
-			fetchData: function () {
-				console.log('fetchData');
+			fetchData: function () {				
 				var xhr = new XMLHttpRequest()
 				var self = this;
 				xhr.open('GET', '/api/orderlist/');
@@ -5476,12 +5475,24 @@ $(function() {
 				}
 				xhr.send()
 			},			
-			open: function (url) {
-				window.open(
-					url,
-					'_blank'
-				  );
-				  return false;			
+			open: function (file) {
+				var xhr = new XMLHttpRequest()
+				var self = this;
+				xhr.open('GET', '/api/getfiledate/' + file.guid + '/');
+				xhr.onload = function () {					
+					try {
+						var data = JSON.parse(xhr.responseText);						
+						if (data.url) {
+							window.open(
+								data.url,
+								'_blank'
+							  );							  
+						}
+				    } catch (e) {
+				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
+				    }				
+				}
+				xhr.send()										
 			},
 			setCurrentItem: function (item) {
 				this.currentItem = item;				

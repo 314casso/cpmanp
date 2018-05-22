@@ -50,6 +50,7 @@ router.register(r'employees', views.EmployeesViewSet, 'employees')
 router.register(r'jobstatus', views.JobStatus, 'jobstatus')
 router.register(r'pingorderlist', views.PingOrderList, 'pingorderlist')
 router.register(r'orderlist', views.OrderListViewSet, 'orderlist')
+router.register(r'getfiledate', views.GetFileDate, 'getfiledate')
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

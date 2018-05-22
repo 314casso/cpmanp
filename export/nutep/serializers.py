@@ -21,7 +21,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class FileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = File
-        fields = ('title', 'file')
+        fields = ('title', 'file', 'guid', 'storage', 'id')
 
 
 class ProcedureLogProcedureSerializer(serializers.ModelSerializer):

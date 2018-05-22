@@ -86,6 +86,7 @@
                 <table class="table table-hover">
                   <thead>
                     <tr>                                                
+                      <th>#</th>
                       <th>Контейнер</th>
                       <th>Размер и тип</th>
                       <th>Выпуск / ВТТ</th>
@@ -98,7 +99,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="datarow" v-for="container in itemContainers( item )">
+                    <tr class="datarow" v-for="(container, index) in itemContainers( item )">
+                      <td><% index + 1 %></td>
                       <th scope="row"><% container.number %></th>
                       <td><% container.size %><% container.type %></td>
                       <td><% container.releasedate | moment %></td>  
@@ -107,7 +109,7 @@
                       <td><% container.driver %></td>
                       <td>
                         <ul v-if="container.files" class="list-group" style="margin-bottom: 0">
-                          <a href="#" v-on:click.prevent="open(file.file)" class="list-group-item list-group-item-default" v-for="file in container.files">
+                          <a href="#" v-on:click.prevent="open(file)" class="list-group-item list-group-item-default" v-for="file in container.files">
                             <strong>
                               <% file.title %>
                             </strong>

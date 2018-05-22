@@ -11,7 +11,7 @@ from zeep.transports import Transport
 
 from export.local_settings import WEB_SERVISES
 from nutep.models import BaseError, Container, CustomsProcedure, \
-    DateQueryEvent, Employee, PREORDER, PreOrder, ProcedureLog
+    DateQueryEvent, Employee, PREORDER, PreOrder, ProcedureLog, File
 from nutep.odata import CRM, Portal
 
 
@@ -38,8 +38,19 @@ class DealService(WSDLService):
         return response      
 
 
+class AttachedFileService(WSDLService):    
+    def set_file_data(self, user, file_guid):                
+        file_store = File.objects.filter(guid=file_guid).last()
+        if not file_store:
+            return                
+        response = self._client.service.GetAttachedFile(file_store.guid, file_store.storage)                
+        data_dict = helpers.serialize_object(response)        
+        file_store.file.save(file_store.title, ContentFile(data_dict['data']))
+        return file_store
+                
+
 class BaseEventService(WSDLService):    
-  def log_event_error(self, e, event, data=None):
+    def log_event_error(self, e, event, data=None):
         base_error = BaseError()
         base_error.content_object = event
         base_error.type = BaseError.UNKNOWN
@@ -80,8 +91,11 @@ class OrderService(BaseEventService):
                                 continue 
                             file_data = data_dict['data']
                             filename = u'%s.%s' %  (data_dict['name'], data_dict['extension'])
-                            file_store = container.files.create(title=filename)             
-                            file_store.file.save(filename, ContentFile(file_data))
+                            file_store = container.files.create(title=filename, 
+                                                                guid=data_dict['guid'], 
+                                                                storage=data_dict['storage'])                                         
+                            if file_data:
+                                file_store.file.save(filename, ContentFile(file_data))                                
                         for procedure_row in container_row.procedures:                            
                             data_dict = helpers.serialize_object(procedure_row)
                             if not data_dict:

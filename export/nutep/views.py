@@ -22,10 +22,12 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from export.local_settings import WEB_SERVISES
 from nutep.forms import ReviseForm, TrackingForm
 from nutep.models import Company, DateQueryEvent, PreOrder
 from nutep.serializers import EmployeesSerializer, EventStatusSerializer, \
     PreOrderSerializer, UserSerializer
+from nutep.services import AttachedFileService
 from nutep.tasks import pre_order_task
 
 
@@ -135,6 +137,13 @@ class JobStatus(viewsets.ViewSet):
         status = job.status if job else None
         return Response({ 'job': status })
     
+
+class GetFileDate(viewsets.ViewSet):
+    def retrieve(self, request, pk):   
+        service = AttachedFileService(WEB_SERVISES['cp'])                        
+        file_store = service.set_file_data(self.request.user, pk)                            
+        return Response({ 'url': file_store.file.url })
+
 
 class EventViewSet(viewsets.ModelViewSet):    
     serializer_class = EventStatusSerializer
