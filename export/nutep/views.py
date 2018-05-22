@@ -142,7 +142,10 @@ class GetFileDate(viewsets.ViewSet):
     def retrieve(self, request, pk):   
         service = AttachedFileService(WEB_SERVISES['cp'])                        
         file_store = service.set_file_data(self.request.user, pk)                            
-        return Response({ 'url': file_store.file.url })
+        url = '#'
+        if file_store.file:
+            url = file_store.file.url
+        return Response({ 'url':  url})
 
 
 class EventViewSet(viewsets.ModelViewSet):    
