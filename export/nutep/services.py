@@ -44,7 +44,8 @@ class AttachedFileService(WSDLService):
         # file_store = File.objects.filter(guid=file_guid).last()
         # if not file_store:
         #     return                
-        response = self._client.service.GetAttachment('86d2d9f1-5a92-11e8-a232-005056884974', 'test')                        
+        response = self._client.service.TerminalExport('66bbf3ee-cea6-11e3-9e77-000c29c1ffac')
+        #response = self._client.service.GetAttachment('86d2d9f1-5a92-11e8-a232-005056884974', 'test')                        
         # data_dict = helpers.serialize_object(response)        
         # if data_dict and 'data' in data_dict['data']:
         #     file_store.file.save(file_store.title, ContentFile(data_dict['data']))
