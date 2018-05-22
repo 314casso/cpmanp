@@ -5478,7 +5478,7 @@ $(function() {
 			open: function (file) {
 				var xhr = new XMLHttpRequest();
 				var self = this;
-				xhr.open('GET', '/getfileurl/' + file.guid + '/');
+				xhr.open('GET', '/getfileurl/' + file.guid + '/', false);
 				xhr.onload = function () {					
 					try {
 						var data = JSON.parse(xhr.responseText);						
