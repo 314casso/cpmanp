@@ -5476,14 +5476,15 @@ $(function() {
 				xhr.send()
 			},			
 			open: function (file) {
+				var wnd = window.open('about:blank', '_blank');
 				var xhr = new XMLHttpRequest();
 				var self = this;
 				xhr.open('GET', '/getfileurl/' + file.guid + '/');
 				xhr.onload = function () {					
 					try {
 						var data = JSON.parse(xhr.responseText);						
-						if (data.url) {
-							window.location = data.url;							
+						if (data.url) {														
+							wnd.location = data.url;
 						}
 				    } catch (e) {
 				    	appSettings.error = "Произошла ошибка обновления данных: " + e + ": " + xhr.responseText;
