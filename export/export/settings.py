@@ -103,6 +103,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'request.middleware.RequestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'nutep.middleware.ThreadLocalMiddleware',    
     # Uncomment the next line for simple clickjacking protection:
@@ -171,6 +172,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'request',
     'corsheaders',
     'nutep',
     'django.contrib.admin',    
@@ -191,6 +193,11 @@ RQ_QUEUES = {
 }
 
 RQ_SHOW_ADMIN_LINK = True
+
+REQUEST_IGNORE_PATHS = (
+    r'^admin/',
+    r'^api/',
+)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
