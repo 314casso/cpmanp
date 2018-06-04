@@ -15,8 +15,7 @@ from nutep.models import BaseError, Container, CustomsProcedure, \
 from nutep.odata import CRM, Portal
 
 import base64
-from suds.cache import NoCache
-from suds.client import Client
+import suds
 from suds.transport.https import HttpAuthenticated
 
 
@@ -37,7 +36,7 @@ class SudsService(object):
             "Authorization" : "Basic %s" % base64string
         }
         t = HttpAuthenticated(username=self.username, password=self.password)
-        self._client = Client(self.url, headers=authenticationHeader, transport=t, cache=NoCache(), timeout=500)
+        self._client = suds.client.Client(self.url, headers=authenticationHeader, transport=t, cache=suds.cache.NoCache(), timeout=500)
 
 
 class WSDLService(object):
@@ -100,6 +99,7 @@ class OrderService(BaseEventService):
                     file_store = event.files.create(title=filename)             
                     file_store.file.save(filename, ContentFile(file_data))
                     event.status = DateQueryEvent.SUCCESS                                          
+                print response
                 for datarow in response:                    
                     data_dict = helpers.serialize_object(datarow)
                     if not data_dict:

@@ -84,6 +84,7 @@ class ErrorInline(GenericTabularInline):
 
 
 class DateQueryEventAdmin(admin.ModelAdmin):
+    list_display = ['date', 'user', 'company', 'status']
     inlines = [ErrorInline, FileInline]
 
 
