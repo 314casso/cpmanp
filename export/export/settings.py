@@ -218,16 +218,6 @@ LOGGING = {
             'level': 'ERROR',            
             'class': 'django.utils.log.AdminEmailHandler'
         },
-                 
-        'logfile': {
-            'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(PROJECT_DIR, 'logs', 'logfile'),
-            'maxBytes': 500000,
-            'backupCount': 2,
-            'formatter': 'standard',
-        },
-                 
     },
     'loggers': {
         'django.request': {
