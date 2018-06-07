@@ -231,14 +231,9 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['logfile'],
+            'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-        'zeep.transports': {
-            'level': 'ERROR',
-            'propagate': True,
-            'handlers': ['logfile'],
         },
     }
 }
