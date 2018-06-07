@@ -223,7 +223,7 @@ LOGGING = {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(PROJECT_DIR, 'logs', 'logfile'),
-            'maxBytes': 50000,
+            'maxBytes': 500000,
             'backupCount': 2,
             'formatter': 'standard',
         },
@@ -236,7 +236,7 @@ LOGGING = {
             'propagate': True,
         },
         'zeep.transports': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'propagate': True,
             'handlers': ['logfile'],
         },
