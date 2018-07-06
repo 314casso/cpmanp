@@ -26,24 +26,38 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
           <div class="x_panel" id="app-revise" v-cloak>
           
+            <div class="x_title">
+              <h3><i class="fa fa-train"></i> Контейнерные поезда 
+                <small><label title="Дата получения данных из учетной системы" class="label label-success" v-if="currentItem"> <% currentItem.event.date | moment %></label>
+              </small></h3>
+            </div>
+            
             <div v-if="loading" class='cssload-jumping'><span></span><span></span><span></span><span></span><span></span></div>
-          
+            <button v-else class="btn btn-info" v-on:click="refreshData" type="button"> Обновить данные</button>
+
+            <div class="x_content table-responsive">
+
+            <paginate 
+              :page-count="paginate.pageCount"                
+              :container-class="'pagination'"
+              :prev-text="'&#8592;'"
+              :next-text="'&#8594;'"
+              :click-handler="clickCallback">
+            </paginate>
+            
             <div class="input-group">
               <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-              <input v-model='search' type="search" class="form-control" name="search" placeholder="Поиск контейнера...">
+              <input v-model='search' type="search" class="form-control" name="search" placeholder="Поиск контейнера в КП, на текущей странице...">
               <span class="input-group-btn">
                 <button class="btn btn-default" v-on:click="clearSearch" type="button"><i class="glyphicon glyphicon-remove"></i></button>
               </span>
-            </div>
-          
-            <div class="x_title">
-              <h3><i class="fa fa-train"></i> Контейнерные поезда</h3>
-            </div>
-            <div class="x_content table-responsive">
+            </div>         
+            
 
             <table class="table table-hover">
               <thead>
                 <tr>                    
+                  <th>&nbsp;</th>                            
                   <th>Номер поезда</th>                            
                   <th>Прибытие на станцию</th>
                   <th>Подача на МАНП</th>
@@ -52,6 +66,7 @@
               </thead>
               <tbody>
                 <tr class="datarow" role="button" v-for="item in items" v-on:click="setCurrentItem(item)" v-bind:class="{active: item == currentItem }">
+                  <td><i v-bind:class="{'glyphicon glyphicon-play': item == currentItem }"></i></td>
                   <th scope="row"><% item.containertrain %></th>
                   <td><% item.arrivaldate | moment %></td>
                   <td><% item.feeddate | moment %></td>
@@ -158,8 +173,10 @@
 {% block javascripts %}
   {{ block.super }}
   <script src="/static/js/lodash/lodash.min.js"></script>
+  <script src="/static/vendors/jscookie/js.cookie.js"></script>
   <script src="/static/vendors/bootstrap-fileinput/js/fileinput.min.js"></script>
   <script src="/static/vendors/bootstrap-fileinput/js/locales/ru.js"></script>
-  <script src="/static/vendors/vue/vue.min.js"></script>
-  <script src="/static/build/js/custom.js?0.0.9"></script>
+  <script src="/static/vendors/vue/vue.min.js"></script>  
+  <script src="https://unpkg.com/vuejs-paginate@0.9.0"></script>
+  <script src="/static/build/js/custom.js?0.0.10"></script>
 {% endblock javascripts %}

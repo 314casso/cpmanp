@@ -5393,7 +5393,9 @@ $(function() {
 	    
 	    return value;
 	}
-		
+
+	Vue.component('paginate', VuejsPaginate);
+	
 	var appRevise = new Vue({
 		el: '#app-revise',
 		data: {
@@ -5401,7 +5403,14 @@ $(function() {
 			],
 			currentItem: null,
 			search: null,
-			loading: false			
+			loading: false,
+			paginate: {
+				pageCount: null,				
+				next: null,
+				prev: null,
+				page: 1,
+			},
+			url: '/api/orderlist/',						
 		},
 		delimiters: ["<%", "%>"],		
 		filters: {
@@ -5415,12 +5424,16 @@ $(function() {
 			this.fetchData();
 			this.pingOrders();			
 		},
-		methods: {			
+		methods: {
+			clickCallback: function(pageNum) {
+				this.paginate.page = pageNum;
+				this.fetchData();
+			},			
 			checkJob: function (job) {
 				var xhr = new XMLHttpRequest()
 				var self = this;
 				if (!job) {
-					this.loading = false;
+					this.loading = false;										
 					return;
 				}
 				xhr.open('GET', '/api/jobstatus/' + job + '/');
@@ -5431,12 +5444,11 @@ $(function() {
 				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
 				    }
 					
-					console.log(resp.job);
+					console.log(resp.job);					
 					if (resp.job == 'started') {
 						setTimeout(self.checkJob, 1000, job);
 					} else {
-						self.fetchData();
-						self.loading = false;
+						self.fetchData();						
 						if (resp.job == 'failed') {
 							appSettings.error = "Произошла ошибка обновления данных";
 						}
@@ -5447,6 +5459,9 @@ $(function() {
 					appSettings.error = "Error " + e.target.status + " occurred while receiving the document.";
 				}
 				xhr.send();				
+			},
+			getUrl: function () {
+				return this.url + '?page=' + this.paginate.page;
 			},
 			pingOrders: function () {				
 				var xhr = new XMLHttpRequest()
@@ -5459,16 +5474,36 @@ $(function() {
 				}
 				xhr.send();
 			}, 
-			fetchData: function () {				
+			refreshData : function () {												
+				this.pingOrders();
+			},
+			fetchData: function () {
+				this.loading = true;						
 				var xhr = new XMLHttpRequest()
 				var self = this;
-				xhr.open('GET', '/api/orderlist/');
-				xhr.onload = function () {					
+				xhr.open('GET', this.getUrl());
+				xhr.onload = function () {	
+					self.loading = false;				
 					try {
-						self.items = JSON.parse(xhr.responseText, reviver);
-						if (self.items) {
-							self.currentItem = self.items[self.items.length - 1];
-						}
+						var data = JSON.parse(xhr.responseText, reviver);
+						self.items = data.results;						
+						self.paginate.pageCount = data.count / 5;
+						self.paginate.next = data.next;
+						self.paginate.prev = data.prev;						
+						var reset = true;
+						if (self.items) {							
+							if (self.currentItem) {								
+								self.items.forEach(function(item) {
+									if (item.containertrain == self.currentItem.containertrain){
+										self.currentItem = item;
+										reset = false;
+									}
+								});
+							} 
+							if (reset) {
+								self.currentItem = self.items[0];
+							}
+						}												
 				    } catch (e) {
 				    	appSettings.error = "Произошла ошибка обновления данных: " + e;
 				    }				

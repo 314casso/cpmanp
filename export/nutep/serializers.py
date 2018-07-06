@@ -45,16 +45,16 @@ class ContainerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class EventStatusSerializer(serializers.HyperlinkedModelSerializer):       
-    user = UserSerializer()  
+class EventStatusSerializer(serializers.ModelSerializer):       
+    # user = UserSerializer()  
     class Meta:
         depth = 1
         model = DateQueryEvent
-        fields = ('id', 'date', 'type', 'status', 'user')
+        fields = ('id', 'date', 'type', 'status')
 
 
 class PreOrderSerializer(serializers.ModelSerializer):
-    #event = EventStatusSerializer()
+    event = EventStatusSerializer()
     containers = ContainerSerializer(many=True)    
     class Meta:
         model = PreOrder        

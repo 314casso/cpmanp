@@ -19,6 +19,7 @@ from django.utils.timezone import now
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from rest_framework import permissions, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -156,13 +157,20 @@ class EmployeesViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeesSerializer
     def get_queryset(self):
         return self.request.user.managers.all()    
-          
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
                       
 class OrderListViewSet(viewsets.ModelViewSet):
     serializer_class = PreOrderSerializer                         
+    pagination_class = StandardResultsSetPagination
     def get_queryset(self):
         event = DateQueryEvent.objects.for_user(self.request.user).filter(status=DateQueryEvent.SUCCESS).order_by('-date').first()
         if not event:
             return PreOrder.objects.none()        
-        return event.orders.filter(containertrain__isnull=False).order_by('date')
+        return event.orders.filter(containertrain__isnull=False).order_by('-date')
                           

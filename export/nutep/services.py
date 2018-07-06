@@ -98,8 +98,7 @@ class OrderService(BaseEventService):
                     filename = u'%s-%s.%s' %  (company, 'tracking' , 'xlsx')
                     file_store = event.files.create(title=filename)             
                     file_store.file.save(filename, ContentFile(file_data))
-                    event.status = DateQueryEvent.SUCCESS                                          
-                print response
+                    event.status = DateQueryEvent.SUCCESS                                                          
                 for datarow in response:                    
                     data_dict = helpers.serialize_object(datarow)
                     if not data_dict:
