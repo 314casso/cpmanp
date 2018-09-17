@@ -90,9 +90,14 @@ class OrderService(BaseEventService):
     def order_list(self, user, start_date):
         try:           
             company = user.companies.filter(membership__is_general=True).first()
-            event = DateQueryEvent.objects.create(user=user, type=PREORDER, status=DateQueryEvent.PENDING, company=company)                                             
+            membership = user.members.get(company=company)
+            payerguid = None
+            if membership.is_restricted:
+                payerguid = company.payer_guid or 'payer_guid should be filled for restricted members'
+
+            event = DateQueryEvent.objects.create(user=user, type=PREORDER, status=DateQueryEvent.PENDING, company=company)
             if company.ukt_guid:         
-                response = self._client.service.AdvanceOrderList(company.ukt_guid, start_date)                                  
+                response = self._client.service.AdvanceOrderList(company.ukt_guid, start_date, payerguid)
                 if hasattr(response, 'report') and response.report:
                     file_data = response.report[0].data                
                     filename = u'%s-%s.%s' %  (company, 'tracking' , 'xlsx')
@@ -185,4 +190,3 @@ class PortalService(object):
             ext = 'jpg'
             imagedata = ContentFile(base64.b64decode(imagedata), name='avatar.' + ext)
             employee.image.save('avatar.jpg', imagedata)           
-

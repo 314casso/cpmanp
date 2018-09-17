@@ -122,12 +122,15 @@ class UserViewSet(viewsets.ModelViewSet):
 class PingOrderList(viewsets.ViewSet):
     def list(self, request):
         today = now()
-        key = 'last_ping_order_list'
+        company = request.user.companies.filter(membership__is_general=True).first()        
+        if not company:
+            return Response({ 'error': 'no company with membership for user %s' % request.user })        
+        key = 'last_ping_order_list_%s' % company.id
         if cache.get(key):
-            return Response({ 'job': 'cached' })
+            return Response({ 'job': 'cached' })            
         cache.set(key, today, 300)   
         start_date = today - timedelta(days=360)
-        job = pre_order_task.delay(request.user, start_date)  # @UndefinedVariable        
+        job = pre_order_task.delay(request.user, start_date)
         return Response({ 'job': job.id })  
  
   
@@ -166,11 +169,11 @@ class StandardResultsSetPagination(PageNumberPagination):
 
                       
 class OrderListViewSet(viewsets.ModelViewSet):
-    serializer_class = PreOrderSerializer                         
+    serializer_class = PreOrderSerializer
     pagination_class = StandardResultsSetPagination
     def get_queryset(self):
         event = DateQueryEvent.objects.for_user(self.request.user).filter(status=DateQueryEvent.SUCCESS).order_by('-date').first()
         if not event:
-            return PreOrder.objects.none()        
-        return event.orders.filter(containertrain__isnull=False).order_by('-date')
+            return PreOrder.objects.none()                    
+        return event.orders.filter(containertrain__isnull=False).prefetch_related("containers", "containers__procedures", "containers__files").order_by('-date')
                           

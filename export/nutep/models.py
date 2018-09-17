@@ -117,6 +117,7 @@ class Container(models.Model):
     dateout = models.DateTimeField(blank=True, db_index=True, null=True)
     pre_order = models.ForeignKey(PreOrder, related_name="containers")
     driver = models.CharField(blank=True, null=True, max_length=150)
+    payerguid = models.CharField(blank=True, null=True, max_length=36)
     files = GenericRelation('File')
     
     def __unicode__(self):
@@ -179,6 +180,7 @@ class Company(models.Model):
     DASHBOARD_VIEW = 'dashboard'
     crm_guid = models.CharField(max_length=36, blank=True, null=True)
     ukt_guid = models.CharField(max_length=36, blank=True, null=True)
+    payer_guid = models.CharField(max_length=36, blank=True, null=True)
     name = models.CharField('Наименование', max_length=150, db_index=True)
     dashboard_view = models.CharField(max_length=50, blank=True, null=True)
     members = models.ManyToManyField(User, blank=True, related_name="companies", through='Membership')
@@ -186,7 +188,7 @@ class Company(models.Model):
     details = JSONField(blank=True, null=True,)
     INN = models.CharField(_('INN'), max_length=14, blank=True, null=True,)   
     KPP = models.CharField(_('KPP'), max_length=10, blank=True, null=True,)    
-    logo = models.ImageField(upload_to=userprofile_path, blank=True, null=True,)    
+    logo = models.ImageField(upload_to=userprofile_path, blank=True, null=True,)        
     def get_dashboard_url(self):        
         return reverse(self.dashboard_view if self.dashboard_view else self.DASHBOARD_VIEW)
     def __unicode__(self):
@@ -202,18 +204,19 @@ class Membership(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)    
     is_general = models.BooleanField(default=False)
     is_payer = models.BooleanField(default=False)
+    is_restricted = models.BooleanField(default=False)    
     def __unicode__(self):
         return u'{0}{1}'.format(self.user, self.company) 
 
 
 class CompanyService(models.Model):
     client_service = models.ForeignKey(ClientService, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="services")    
-    title = models.CharField(max_length=150, blank=True, null=True,)   
-    nav = models.CharField(max_length=150, blank=True, null=True,)   
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="services")
+    title = models.CharField(max_length=150, blank=True, null=True,)
+    nav = models.CharField(max_length=150, blank=True, null=True,)
     is_active = models.BooleanField(default=False)
-    is_menu = models.BooleanField(default=True)        
-    order = models.IntegerField(default=100)        
+    is_menu = models.BooleanField(default=True)
+    order = models.IntegerField(default=100)
     def get_nav_url(self):
         nav = self.nav if self.nav else self.client_service.nav
         return parse_nav(nav)
@@ -370,7 +373,4 @@ class InfoSource(models.Model):
     
     def __unicode__(self):
         return u'{0}'.format(self.name)
-
-
-
         

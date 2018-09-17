@@ -37,10 +37,22 @@ class CustomsProcedureSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# class FilteredListSerializer(serializers.ListSerializer):
+#     def to_representation(self, data):
+#         user = self.context['request'].user
+#         company = user.companies.filter(membership__is_general=True).first()        
+#         membership = user.members.get(company=company)
+#         if membership.is_restricted:            
+#             data = data.filter(payerguid=company.payer_guid)
+        
+#         return super(FilteredListSerializer, self).to_representation(data)
+
+
 class ContainerSerializer(serializers.ModelSerializer):
     procedures = CustomsProcedureSerializer(many=True)
     files = FileSerializer(many=True)
     class Meta:
+        # list_serializer_class = FilteredListSerializer
         model = Container
         fields = '__all__'
 
@@ -55,7 +67,7 @@ class EventStatusSerializer(serializers.ModelSerializer):
 
 class PreOrderSerializer(serializers.ModelSerializer):
     event = EventStatusSerializer()
-    containers = ContainerSerializer(many=True)    
+    containers = ContainerSerializer(many=True, read_only=True)    
     class Meta:
         model = PreOrder        
         fields = '__all__'
